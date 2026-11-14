@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+.pytest_cache/
+backend/.cache/
+
+ROADMAP.md
+.cache/
+# Generated locally by the backend scripts — too large for git
+frontend/static/data/terrain/
+frontend/static/data/basemap/

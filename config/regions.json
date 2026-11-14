@@ -1,0 +1,861 @@
+{
+  "_comment": "Places on the map. Ski areas: OpenStreetMap lifts; heights: Copernicus DEM. detail_bounds = [west, south, east, north].",
+  "country": {
+    "bounds": [
+      20.4,
+      40.8,
+      23.1,
+      42.4
+    ],
+    "center": [
+      21.75,
+      41.6
+    ]
+  },
+  "places": [
+    {
+      "id": "kozuf",
+      "kind": "resort",
+      "pilot": true,
+      "name": {
+        "mk": "Кожуф",
+        "en": "Kožuf"
+      },
+      "range": {
+        "mk": "Кожуф",
+        "en": "Kožuf"
+      },
+      "center": [
+        22.2002,
+        41.1783
+      ],
+      "detail_bounds": [
+        22.12,
+        41.12,
+        22.28,
+        41.22
+      ],
+      "points": [
+        {
+          "id": "base",
+          "name": {
+            "mk": "Долна станица",
+            "en": "Lift base"
+          },
+          "lon": 22.1998,
+          "lat": 41.1772,
+          "elevation": 1577
+        },
+        {
+          "id": "mid",
+          "name": {
+            "mk": "Средна висина",
+            "en": "Mid-mountain"
+          },
+          "lon": 22.205,
+          "lat": 41.169,
+          "elevation": 1865
+        },
+        {
+          "id": "summit",
+          "name": {
+            "mk": "Зелен Брег (врв)",
+            "en": "Zelen Breg (summit)"
+          },
+          "lon": 22.2094,
+          "lat": 41.1594,
+          "elevation": 2170
+        }
+      ],
+      "sources": {
+        "location": "OpenStreetMap ski lifts (© OpenStreetMap contributors, ODbL)",
+        "elevation": "Copernicus DEM GLO-30 at lift stations",
+        "checked": "2026-11-14"
+      }
+    },
+    {
+      "id": "popova_sapka",
+      "kind": "resort",
+      "name": {
+        "mk": "Попова Шапка",
+        "en": "Popova Šapka"
+      },
+      "range": {
+        "mk": "Шар Планина",
+        "en": "Šar Planina"
+      },
+      "center": [
+        20.875,
+        42.009
+      ],
+      "detail_bounds": [
+        20.77,
+        41.96,
+        20.92,
+        42.04
+      ],
+      "points": [
+        {
+          "id": "base",
+          "name": {
+            "mk": "Долна станица",
+            "en": "Lift base"
+          },
+          "lon": 20.8869,
+          "lat": 42.0111,
+          "elevation": 1663
+        },
+        {
+          "id": "top",
+          "name": {
+            "mk": "Горна станица",
+            "en": "Top lift"
+          },
+          "lon": 20.8559,
+          "lat": 42.0151,
+          "elevation": 2388
+        }
+      ],
+      "sources": {
+        "location": "OpenStreetMap ski lifts (© OpenStreetMap contributors, ODbL)",
+        "elevation": "Copernicus DEM GLO-30 at lift stations",
+        "checked": "2026-11-14"
+      }
+    },
+    {
+      "id": "mavrovo",
+      "kind": "resort",
+      "name": {
+        "mk": "Маврово (Заре Лазаревски)",
+        "en": "Mavrovo (Zare Lazarevski)"
+      },
+      "range": {
+        "mk": "Бистра",
+        "en": "Bistra"
+      },
+      "center": [
+        20.72,
+        41.638
+      ],
+      "detail_bounds": [
+        20.68,
+        41.61,
+        20.76,
+        41.66
+      ],
+      "points": [
+        {
+          "id": "base",
+          "name": {
+            "mk": "Долна станица",
+            "en": "Lift base"
+          },
+          "lon": 20.737,
+          "lat": 41.649,
+          "elevation": 1256
+        },
+        {
+          "id": "top",
+          "name": {
+            "mk": "Горна станица",
+            "en": "Top lift"
+          },
+          "lon": 20.699,
+          "lat": 41.6259,
+          "elevation": 1878
+        }
+      ],
+      "sources": {
+        "location": "OpenStreetMap ski lifts (© OpenStreetMap contributors, ODbL)",
+        "elevation": "Copernicus DEM GLO-30 at lift stations",
+        "checked": "2026-11-14"
+      }
+    },
+    {
+      "id": "kopanki",
+      "kind": "resort",
+      "name": {
+        "mk": "Копанки (Пелистер)",
+        "en": "Kopanki (Pelister)"
+      },
+      "range": {
+        "mk": "Баба",
+        "en": "Baba"
+      },
+      "center": [
+        21.219,
+        41.034
+      ],
+      "detail_bounds": [
+        21.2,
+        41.02,
+        21.24,
+        41.05
+      ],
+      "points": [
+        {
+          "id": "base",
+          "name": {
+            "mk": "Долна станица",
+            "en": "Lift base"
+          },
+          "lon": 21.2247,
+          "lat": 41.0374,
+          "elevation": 1420
+        },
+        {
+          "id": "top",
+          "name": {
+            "mk": "Горна станица",
+            "en": "Top lift"
+          },
+          "lon": 21.2138,
+          "lat": 41.03,
+          "elevation": 1766
+        }
+      ],
+      "sources": {
+        "location": "OpenStreetMap ski lifts (© OpenStreetMap contributors, ODbL)",
+        "elevation": "Copernicus DEM GLO-30 at lift stations",
+        "checked": "2026-11-14"
+      }
+    },
+    {
+      "id": "krusevo",
+      "kind": "resort",
+      "name": {
+        "mk": "Крушево",
+        "en": "Kruševo"
+      },
+      "range": {
+        "mk": "Бушева Планина",
+        "en": "Buševa Planina"
+      },
+      "center": [
+        21.24,
+        41.367
+      ],
+      "detail_bounds": [
+        21.22,
+        41.355,
+        21.26,
+        41.38
+      ],
+      "points": [
+        {
+          "id": "base",
+          "name": {
+            "mk": "Долна станица",
+            "en": "Lift base"
+          },
+          "lon": 21.2462,
+          "lat": 41.3674,
+          "elevation": 1214
+        },
+        {
+          "id": "top",
+          "name": {
+            "mk": "Горна станица",
+            "en": "Top lift"
+          },
+          "lon": 21.237,
+          "lat": 41.3667,
+          "elevation": 1408
+        }
+      ],
+      "sources": {
+        "location": "OpenStreetMap ski lifts (© OpenStreetMap contributors, ODbL)",
+        "elevation": "Copernicus DEM GLO-30 at lift stations",
+        "checked": "2026-11-14"
+      }
+    },
+    {
+      "id": "ponikva",
+      "kind": "resort",
+      "name": {
+        "mk": "Пониква",
+        "en": "Ponikva"
+      },
+      "range": {
+        "mk": "Осогово",
+        "en": "Osogovo"
+      },
+      "center": [
+        22.3555,
+        42.036
+      ],
+      "detail_bounds": [
+        22.34,
+        42.02,
+        22.37,
+        42.05
+      ],
+      "points": [
+        {
+          "id": "base",
+          "name": {
+            "mk": "Долна станица",
+            "en": "Lift base"
+          },
+          "lon": 22.3581,
+          "lat": 42.0418,
+          "elevation": 1506
+        },
+        {
+          "id": "top",
+          "name": {
+            "mk": "Горна станица",
+            "en": "Top lift"
+          },
+          "lon": 22.353,
+          "lat": 42.0396,
+          "elevation": 1633
+        }
+      ],
+      "sources": {
+        "location": "OpenStreetMap ski lifts (© OpenStreetMap contributors, ODbL)",
+        "elevation": "Copernicus DEM GLO-30 at lift stations",
+        "checked": "2026-11-14"
+      }
+    },
+    {
+      "id": "mihajlovo",
+      "kind": "resort",
+      "name": {
+        "mk": "Михајлово",
+        "en": "Mihajlovo"
+      },
+      "range": {
+        "mk": "Кожуф",
+        "en": "Kožuf"
+      },
+      "center": [
+        22.065,
+        41.1865
+      ],
+      "detail_bounds": [
+        22.055,
+        41.18,
+        22.075,
+        41.195
+      ],
+      "points": [
+        {
+          "id": "base",
+          "name": {
+            "mk": "Долна станица",
+            "en": "Lift base"
+          },
+          "lon": 22.0669,
+          "lat": 41.1859,
+          "elevation": 1233
+        },
+        {
+          "id": "top",
+          "name": {
+            "mk": "Горна станица",
+            "en": "Top lift"
+          },
+          "lon": 22.0628,
+          "lat": 41.1873,
+          "elevation": 1346
+        }
+      ],
+      "sources": {
+        "location": "OpenStreetMap ski lifts (© OpenStreetMap contributors, ODbL)",
+        "elevation": "Copernicus DEM GLO-30 at lift stations",
+        "checked": "2026-11-14"
+      }
+    },
+    {
+      "id": "nizepole",
+      "kind": "resort",
+      "name": {
+        "mk": "Нижеполе (Пелистер)",
+        "en": "Nižepole (Pelister)"
+      },
+      "range": {
+        "mk": "Баба",
+        "en": "Baba"
+      },
+      "center": [
+        21.2556,
+        40.9807
+      ],
+      "detail_bounds": [
+        21.24,
+        40.97,
+        21.27,
+        40.99
+      ],
+      "points": [
+        {
+          "id": "base",
+          "name": {
+            "mk": "Долна станица",
+            "en": "Lift base"
+          },
+          "lon": 21.2497,
+          "lat": 40.9821,
+          "elevation": 1315
+        },
+        {
+          "id": "top",
+          "name": {
+            "mk": "Горна станица",
+            "en": "Top lift"
+          },
+          "lon": 21.2615,
+          "lat": 40.9793,
+          "elevation": 1613
+        }
+      ],
+      "sources": {
+        "location": "OpenStreetMap ski lifts (© OpenStreetMap contributors, ODbL)",
+        "elevation": "Copernicus DEM GLO-30 at lift stations",
+        "checked": "2026-11-14"
+      }
+    },
+    {
+      "id": "titov_vrv",
+      "kind": "touring",
+      "name": {
+        "mk": "Титов Врв",
+        "en": "Titov Vrv"
+      },
+      "range": {
+        "mk": "Шар Планина",
+        "en": "Šar Planina"
+      },
+      "center": [
+        20.7982,
+        41.992
+      ],
+      "detail_bounds": [
+        20.76,
+        41.96,
+        20.84,
+        42.02
+      ],
+      "points": [
+        {
+          "id": "treeline",
+          "name": {
+            "mk": "Шумска граница",
+            "en": "Treeline"
+          },
+          "lon": 20.7982,
+          "lat": 41.992,
+          "elevation": 1800
+        },
+        {
+          "id": "summit",
+          "name": {
+            "mk": "Врв",
+            "en": "Summit"
+          },
+          "lon": 20.7982,
+          "lat": 41.992,
+          "elevation": 2744
+        }
+      ],
+      "sources": {
+        "location": "OpenStreetMap peak (© OpenStreetMap contributors, ODbL)",
+        "elevation": "Copernicus DEM GLO-30",
+        "checked": "2026-11-14"
+      }
+    },
+    {
+      "id": "ljuboten",
+      "kind": "touring",
+      "name": {
+        "mk": "Љуботен",
+        "en": "Ljuboten"
+      },
+      "range": {
+        "mk": "Шар Планина",
+        "en": "Šar Planina"
+      },
+      "center": [
+        21.1191,
+        42.2068
+      ],
+      "detail_bounds": [
+        21.08,
+        42.18,
+        21.16,
+        42.23
+      ],
+      "points": [
+        {
+          "id": "treeline",
+          "name": {
+            "mk": "Шумска граница",
+            "en": "Treeline"
+          },
+          "lon": 21.1191,
+          "lat": 42.2068,
+          "elevation": 1800
+        },
+        {
+          "id": "summit",
+          "name": {
+            "mk": "Врв",
+            "en": "Summit"
+          },
+          "lon": 21.1191,
+          "lat": 42.2068,
+          "elevation": 2493
+        }
+      ],
+      "sources": {
+        "location": "OpenStreetMap peak (© OpenStreetMap contributors, ODbL)",
+        "elevation": "Copernicus DEM GLO-30",
+        "checked": "2026-11-14"
+      }
+    },
+    {
+      "id": "korab",
+      "kind": "touring",
+      "name": {
+        "mk": "Голем Кораб",
+        "en": "Golem Korab"
+      },
+      "range": {
+        "mk": "Кораб",
+        "en": "Korab"
+      },
+      "center": [
+        20.5469,
+        41.7903
+      ],
+      "detail_bounds": [
+        20.51,
+        41.76,
+        20.59,
+        41.82
+      ],
+      "points": [
+        {
+          "id": "treeline",
+          "name": {
+            "mk": "Шумска граница",
+            "en": "Treeline"
+          },
+          "lon": 20.5469,
+          "lat": 41.7903,
+          "elevation": 1800
+        },
+        {
+          "id": "summit",
+          "name": {
+            "mk": "Врв",
+            "en": "Summit"
+          },
+          "lon": 20.5469,
+          "lat": 41.7903,
+          "elevation": 2714
+        }
+      ],
+      "sources": {
+        "location": "OpenStreetMap peak (© OpenStreetMap contributors, ODbL)",
+        "elevation": "Copernicus DEM GLO-30",
+        "checked": "2026-11-14"
+      }
+    },
+    {
+      "id": "solunska_glava",
+      "kind": "touring",
+      "name": {
+        "mk": "Солунска Глава",
+        "en": "Solunska Glava"
+      },
+      "range": {
+        "mk": "Јакупица",
+        "en": "Jakupica"
+      },
+      "center": [
+        21.4042,
+        41.7039
+      ],
+      "detail_bounds": [
+        21.36,
+        41.67,
+        21.45,
+        41.73
+      ],
+      "points": [
+        {
+          "id": "treeline",
+          "name": {
+            "mk": "Шумска граница",
+            "en": "Treeline"
+          },
+          "lon": 21.4042,
+          "lat": 41.7039,
+          "elevation": 1800
+        },
+        {
+          "id": "summit",
+          "name": {
+            "mk": "Врв",
+            "en": "Summit"
+          },
+          "lon": 21.4042,
+          "lat": 41.7039,
+          "elevation": 2521
+        }
+      ],
+      "sources": {
+        "location": "OpenStreetMap peak (© OpenStreetMap contributors, ODbL)",
+        "elevation": "Copernicus DEM GLO-30",
+        "checked": "2026-11-14"
+      }
+    },
+    {
+      "id": "pelister",
+      "kind": "touring",
+      "name": {
+        "mk": "Пелистер",
+        "en": "Pelister"
+      },
+      "range": {
+        "mk": "Баба",
+        "en": "Baba"
+      },
+      "center": [
+        21.1832,
+        41.0027
+      ],
+      "detail_bounds": [
+        21.14,
+        40.97,
+        21.22,
+        41.03
+      ],
+      "points": [
+        {
+          "id": "treeline",
+          "name": {
+            "mk": "Шумска граница",
+            "en": "Treeline"
+          },
+          "lon": 21.1832,
+          "lat": 41.0027,
+          "elevation": 1800
+        },
+        {
+          "id": "summit",
+          "name": {
+            "mk": "Врв",
+            "en": "Summit"
+          },
+          "lon": 21.1832,
+          "lat": 41.0027,
+          "elevation": 2589
+        }
+      ],
+      "sources": {
+        "location": "OpenStreetMap peak (© OpenStreetMap contributors, ODbL)",
+        "elevation": "Copernicus DEM GLO-30",
+        "checked": "2026-11-14"
+      }
+    },
+    {
+      "id": "kajmakcalan",
+      "kind": "touring",
+      "name": {
+        "mk": "Кајмакчалан",
+        "en": "Kajmakčalan"
+      },
+      "range": {
+        "mk": "Ниџе",
+        "en": "Nidže"
+      },
+      "center": [
+        21.7862,
+        40.9307
+      ],
+      "detail_bounds": [
+        21.75,
+        40.9,
+        21.83,
+        40.96
+      ],
+      "points": [
+        {
+          "id": "treeline",
+          "name": {
+            "mk": "Шумска граница",
+            "en": "Treeline"
+          },
+          "lon": 21.7862,
+          "lat": 40.9307,
+          "elevation": 1800
+        },
+        {
+          "id": "summit",
+          "name": {
+            "mk": "Врв",
+            "en": "Summit"
+          },
+          "lon": 21.7862,
+          "lat": 40.9307,
+          "elevation": 2515
+        }
+      ],
+      "sources": {
+        "location": "OpenStreetMap peak (© OpenStreetMap contributors, ODbL)",
+        "elevation": "Copernicus DEM GLO-30",
+        "checked": "2026-11-14"
+      }
+    },
+    {
+      "id": "medenica",
+      "kind": "touring",
+      "name": {
+        "mk": "Меденица",
+        "en": "Medenica"
+      },
+      "range": {
+        "mk": "Бистра",
+        "en": "Bistra"
+      },
+      "center": [
+        20.6574,
+        41.6229
+      ],
+      "detail_bounds": [
+        20.62,
+        41.6,
+        20.7,
+        41.65
+      ],
+      "points": [
+        {
+          "id": "treeline",
+          "name": {
+            "mk": "Шумска граница",
+            "en": "Treeline"
+          },
+          "lon": 20.6574,
+          "lat": 41.6229,
+          "elevation": 1800
+        },
+        {
+          "id": "summit",
+          "name": {
+            "mk": "Врв",
+            "en": "Summit"
+          },
+          "lon": 20.6574,
+          "lat": 41.6229,
+          "elevation": 2158
+        }
+      ],
+      "sources": {
+        "location": "OpenStreetMap peak (© OpenStreetMap contributors, ODbL)",
+        "elevation": "Copernicus DEM GLO-30",
+        "checked": "2026-11-14"
+      }
+    },
+    {
+      "id": "magaro",
+      "kind": "touring",
+      "name": {
+        "mk": "Магаро",
+        "en": "Magaro"
+      },
+      "range": {
+        "mk": "Галичица",
+        "en": "Galičica"
+      },
+      "center": [
+        20.8206,
+        40.9332
+      ],
+      "detail_bounds": [
+        20.78,
+        40.9,
+        20.86,
+        40.96
+      ],
+      "points": [
+        {
+          "id": "treeline",
+          "name": {
+            "mk": "Шумска граница",
+            "en": "Treeline"
+          },
+          "lon": 20.8206,
+          "lat": 40.9332,
+          "elevation": 1800
+        },
+        {
+          "id": "summit",
+          "name": {
+            "mk": "Врв",
+            "en": "Summit"
+          },
+          "lon": 20.8206,
+          "lat": 40.9332,
+          "elevation": 2245
+        }
+      ],
+      "sources": {
+        "location": "OpenStreetMap peak (© OpenStreetMap contributors, ODbL)",
+        "elevation": "Copernicus DEM GLO-30",
+        "checked": "2026-11-14"
+      }
+    },
+    {
+      "id": "ruen",
+      "kind": "touring",
+      "name": {
+        "mk": "Руен",
+        "en": "Ruen"
+      },
+      "range": {
+        "mk": "Осогово",
+        "en": "Osogovo"
+      },
+      "center": [
+        22.5163,
+        42.158
+      ],
+      "detail_bounds": [
+        22.48,
+        42.13,
+        22.56,
+        42.19
+      ],
+      "points": [
+        {
+          "id": "treeline",
+          "name": {
+            "mk": "Шумска граница",
+            "en": "Treeline"
+          },
+          "lon": 22.5163,
+          "lat": 42.158,
+          "elevation": 1800
+        },
+        {
+          "id": "summit",
+          "name": {
+            "mk": "Врв",
+            "en": "Summit"
+          },
+          "lon": 22.5163,
+          "lat": 42.158,
+          "elevation": 2249
+        }
+      ],
+      "sources": {
+        "location": "OpenStreetMap peak (© OpenStreetMap contributors, ODbL)",
+        "elevation": "Copernicus DEM GLO-30",
+        "checked": "2026-11-14"
+      }
+    }
+  ]
+}
