@@ -1,9 +1,7 @@
-<img src="frontend/static/icon-512.png" alt="" width="72" align="right">
-
 # ЛавинОко (LavinOko) ❄️🏔️
 
 *"Avalanche Eye"* — a free, open avalanche information service for the mountains of North Macedonia.
-8 ski areas and 9 freeride/touring summits; pilot: Kožuf.
+8 ski areas and 9 freeride/touring summits;
 
 **Proof of concept: it shows terrain and weather, not avalanche danger.**
 
@@ -14,9 +12,6 @@
 - **Alerts** only when 2 of 3 independent models (ICON-EU, GFS, Météo-France) agree.
 - **Terrain:** slope angle, aspect and relief from the Copernicus DEM, country-wide with extra detail around places.
 - **Follow** places, **print** a one-page tour sheet (map, conditions, 112, plan), **offline** use.
-- Macedonian and English.
-
-Field reports are built but switched off (`REPORTS_ENABLED` in `frontend/src/lib/reports.ts`).
 
 ## Layout
 
