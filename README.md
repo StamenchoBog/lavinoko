@@ -1,4 +1,4 @@
-# ЛавинОко (LavinOko) ❄️🏔️
+# LavinOko
 
 *"Avalanche Eye"* — a free, open avalanche information service for the mountains of North Macedonia.
 8 ski areas and 9 freeride/touring summits;
