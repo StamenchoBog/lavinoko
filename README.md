@@ -84,4 +84,7 @@ Open-Meteo (CC BY 4.0, non-commercial), Copernicus DEM GLO-30, OpenStreetMap (OD
 Credits are in `config/sources.json` and shown in the app. LavinOko stays non-commercial, since several of these
 terms require it.
 
+Security or safety problem? Report it privately: see [SECURITY.md](SECURITY.md).
+Repository settings and branch rules: [docs/repository-settings.md](docs/repository-settings.md).
+
 Code is [MIT](LICENSE). The ЛавинОко / LavinOko name and logo (`logo/`) are not covered by the MIT licence.

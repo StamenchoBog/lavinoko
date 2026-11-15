@@ -1,0 +1,28 @@
+# Code owners are asked to review every pull request that touches their paths.
+# With "Require review from Code Owners" on (see docs/repository-settings.md), their approval is needed to merge.
+#
+# The last matching line wins. Today one maintainer owns everything; the sections below mark the areas that will
+# need a specific reviewer as the team grows. Add people or teams there, e.g. "@org/forecasters".
+
+# Everything
+*                                   @StamenchoBog
+
+# Supply chain and automation: workflows run with tokens, Dependabot decides what gets installed.
+/.github/                           @StamenchoBog
+/frontend/pnpm-workspace.yaml       @StamenchoBog
+/frontend/package.json              @StamenchoBog
+/backend/pyproject.toml             @StamenchoBog
+
+# Safety wording: what the public reads about danger, alerts and limits. Future: a trained forecaster.
+/frontend/src/lib/i18n.ts           @StamenchoBog
+/frontend/src/lib/components/place/ @StamenchoBog
+/SECURITY.md                        @StamenchoBog
+
+# Alert thresholds and forecast logic. Future: forecaster + developer.
+/backend/weather/                   @StamenchoBog
+
+# Data sources, licences and credits. Future: whoever handles partnerships and data agreements.
+/config/sources.json                @StamenchoBog
+
+# Draft terrain classes (AutoATES): not public until guides have reviewed them.
+/backend/ates/                      @StamenchoBog
