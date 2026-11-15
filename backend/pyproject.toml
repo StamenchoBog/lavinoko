@@ -13,6 +13,8 @@ dependencies = [
 
 [dependency-groups]
 dev = ["pytest>=8.0"]
+# Pinned so CI and local runs format the same way; Dependabot bumps it.
+lint = ["ruff==0.17.5"]
 
 [tool.uv]
 package = false

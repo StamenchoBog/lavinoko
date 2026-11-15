@@ -1,0 +1,57 @@
+# Dependency updates. Security updates (for known vulnerabilities) are separate: turn them on under
+# Settings → Code security → Dependabot security updates. They ignore the cooldown below.
+#
+# Cooldown: a new release waits a few days before Dependabot proposes it. Most hijacked packages
+# are found and pulled within that window, so they never reach a PR here.
+# Dependabot PRs get the same read-only CI token as any fork PR and no secrets.
+version: 2
+
+updates:
+  # Keeps the SHA pins in .github/workflows/ and their "# vX.Y.Z" comments up to date.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "ci"
+
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
+    open-pull-requests-limit: 5
+    groups:
+      # Minor and patch updates of dev tooling land as one PR; majors and runtime deps stay separate.
+      dev-tooling:
+        dependency-type: development
+        update-types: [minor, patch]
+      runtime:
+        dependency-type: production
+        update-types: [minor, patch]
+    commit-message:
+      prefix: "deps(frontend)"
+
+  - package-ecosystem: uv
+    directory: /backend
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
+    open-pull-requests-limit: 5
+    groups:
+      python:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: "deps(backend)"

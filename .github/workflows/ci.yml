@@ -1,6 +1,8 @@
 name: CI
 
 # Checks only: lint, tests, type check and build. Nothing is deployed and no data is fetched.
+# Actions are pinned to full commit SHAs (a tag can be moved to other code; a SHA can't).
+# Dependabot keeps the SHAs and the version comments next to them up to date.
 on:
   push:
     branches: [main]
@@ -9,57 +11,127 @@ on:
 permissions:
   contents: read
 
+# A new push to the same branch or PR cancels the run still going for the old one.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   backend:
+    name: backend / ${{ matrix.name }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: lint
+            run: |
+              uv run --only-group lint ruff check .
+              uv run --only-group lint ruff format --check .
+          - name: tests
+            run: uv run --group dev pytest -q
+          # The frontend's types and data check are generated from backend/contract/models.py.
+          - name: data contract
+            run: uv run python -m contract.generate --check
     defaults:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
-      - name: Lint
-        run: |
-          uvx ruff check .
-          uvx ruff format --check .
-      - name: Tests
-        run: uv run --group dev pytest -q
-      # The frontend's types and data check are generated from backend/contract/models.py.
-      - name: Data contract up to date
-        run: uv run python -m contract.generate --check
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.11.33"
+          working-directory: backend
+      - name: ${{ matrix.name }}
+        run: ${{ matrix.run }}
 
   frontend:
+    name: frontend / ${{ matrix.name }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: lint
+            run: npm run lint
+          - name: type check
+            # Warnings fail too.
+            run: npm run check
+          - name: build and size
+            # First page load must stay under 100 KB.
+            run: |
+              npm run build
+              npm run size
     defaults:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22"
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
-      - name: Lint
-        run: npm run lint
-      - name: Type check (warnings fail too)
-        run: npm run check
-      - name: Build
-        run: npm run build
-      - name: First page load under 100 KB
-        run: npm run size
+      - name: ${{ matrix.name }}
+        run: ${{ matrix.run }}
+
+  # One job per Playwright project. Each builds the site itself (playwright.config.ts webServer).
+  frontend-tests:
+    name: frontend / tests (${{ matrix.project }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [unit, e2e]
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
       # static/data/ is generated and not in git: the tests use the small copy in tests/fixtures/data.
       - name: Test data
         run: npm run test:data
+      # The unit tests are plain Node and never open a page.
       - name: Install browser
+        if: matrix.project == 'e2e'
         run: npx playwright install --with-deps chromium
       - name: Playwright tests
-        run: npm test
+        run: npx playwright test --project=${{ matrix.project }}
       - name: Keep traces of failed tests
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: playwright-traces
+          name: playwright-traces-${{ matrix.project }}
           path: frontend/test-results/
           retention-days: 7
+
+  # A single, stable check to mark as required in branch protection, whatever the matrix holds.
+  ci-ok:
+    name: CI passed
+    if: always()
+    needs: [backend, frontend, frontend-tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: All jobs succeeded
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Results: $RESULTS"
+          for r in $RESULTS; do [ "$r" = success ] || exit 1; done
