@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte';
+  import { asset } from '$app/paths';
   import { base } from '#lib/paths.ts';
   import MapView from '#lib/components/MapView.svelte';
   import Overview from '#lib/components/Overview.svelte';
@@ -135,7 +136,7 @@
 <aside class="panel" class:aside={!!ui.inspect}>
   <div class="top">
     <button class="brand" onclick={() => selectPlace(null)} aria-label={s.all_places}>
-      <img src="{base}/logo.png" alt="" width="34" height="21" />
+      <img src={asset('logo.png')} alt="" width="34" height="21" />
       <span><b>{s.brand}</b><small>{s.tagline}</small></span>
     </button>
     <div class="settings">

@@ -35,6 +35,9 @@ updates:
       # Drop this once they accept 7.
       - dependency-name: typescript
         versions: [">=7"]
+      # Types for the Node version CI runs (node-version in ci.yml). Bump both together, by hand.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     groups:
       # These require matching versions of each other (peer dependencies): a major of one alone can't
       # install. They always move together, majors included, in a single PR.
