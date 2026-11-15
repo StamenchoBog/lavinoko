@@ -1,11 +1,9 @@
 <script lang="ts">
   // Which slope aspects are affected, as an eight-sector compass (as in Alpine bulletins),
   // always with the elevation written next to it.
-  import { t } from '$lib/state.svelte';
   import type { Compass } from '$lib/types';
 
   let { aspects, label }: { aspects: Compass[]; label: string } = $props();
-  const s = $derived(t());
   const ORDER: Compass[] = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
 
   // Sector i spans (i*45 - 22.5) .. (i*45 + 22.5) degrees, clockwise from north.

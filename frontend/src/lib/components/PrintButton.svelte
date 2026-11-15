@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { printPlace, type PrintMode } from '$lib/printing';
+  import { printNow } from '$lib/printLoader';
+  import type { PrintMode } from '$lib/printing';
   import { t } from '$lib/state.svelte';
 
   const s = $derived(t());
@@ -9,7 +10,7 @@
   async function go(mode: PrintMode) {
     open = false;
     busy = true;
-    await printPlace(mode);
+    await printNow(mode).catch(() => {});
     busy = false;
   }
 </script>

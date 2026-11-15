@@ -36,6 +36,28 @@ export function nextIssue(now = new Date()): string {
   return '';
 }
 
+/** The latest scheduled issue at or before `now` (Skopje changes time by whole hours). */
+export function previousIssue(now = new Date()): Date {
+  const hour = Math.floor(now.getTime() / 3600e3) * 3600e3;
+  for (let h = 0; h < 48; h++) {
+    const d = new Date(hour - h * 3600e3);
+    if (ISSUE_HOURS.includes(Number(skopjeParts(d).hour))) return d;
+  }
+  return new Date(hour);
+}
+
+/** The pipeline gets this long to publish a scheduled issue, and may publish this much early. */
+const ISSUE_GRACE_MS = 3600e3;
+
+/**
+ * True when a newer forecast should exist than the one shown: judged from the data's age,
+ * so it also catches a weak connection where the browser still reports being online.
+ */
+export function missedIssue(issuedIso: string, now = new Date()): boolean {
+  const expected = previousIssue(new Date(now.getTime() - ISSUE_GRACE_MS));
+  return Date.parse(issuedIso) < expected.getTime() - ISSUE_GRACE_MS;
+}
+
 /** "Сре 11.11." from "2026-11-11". */
 export function dayLabel(date: string, weekdays: string[]): string {
   const d = new Date(date + 'T00:00:00Z');
@@ -45,11 +67,3 @@ export function dayLabel(date: string, weekdays: string[]): string {
 export const COMPASS_DEG: Record<Compass, number> = { N: 0, NE: 45, E: 90, SE: 135, S: 180, SW: 225, W: 270, NW: 315 };
 
 export const byHeight = (pts: WeatherPoint[]) => [...pts].sort((a, b) => b.elevation - a.elevation);
-
-/** Ink or white, whichever reads better on an [r, g, b] background (WCAG relative luminance). */
-export function textOn(rgb: number[]): string {
-  const lin = (c: number) => ((c /= 255) <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
-  const L = 0.2126 * lin(rgb[0]) + 0.7152 * lin(rgb[1]) + 0.0722 * lin(rgb[2]);
-  const ink = 0.0204; // luminance of #17283a
-  return (L + 0.05) / (ink + 0.05) >= 1.05 / (L + 0.05) ? '#17283a' : '#ffffff';
-}

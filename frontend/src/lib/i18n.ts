@@ -1,7 +1,10 @@
 // Page text in each language. Macedonian is the default.
 // To add a language (e.g. Albanian "sq"): add it to Lang in types.ts, copy the "en" block, translate.
 // Placeholders in {braces} are filled from the data.
-import type { Lang } from './types';
+import type { FlagCode, Lang } from './types';
+
+/** Avalanche problem a weather flag typically creates (see components/place/Situation.svelte). */
+export type Problem = 'new_snow' | 'wind_slab' | 'wet_snow';
 
 const mk = {
   tagline: 'Систем за лавински информации',
@@ -30,7 +33,7 @@ const mk = {
       look: 'влажна површина, длабоко пропаѓање без скии, мали влажни лавини. Завршете рано.' },
     favourable: { name: 'Нема временски појави типични за лавински проблеми',
       why: 'Во прогнозата нема обилен снег, навејување или затоплување. Стари слаби слоеви во снегот не можат да се проценат од времето: внимавајте на знаци на нестабилност.' }
-  } as Record<string, { name: string; lasts?: string; where?: string; why: string; look?: string }>,
+  } satisfies Record<Problem | 'favourable', { name: string; lasts?: string; where?: string; why: string; look?: string }>,
   doc_sheet: 'Лист за тура',
   doc_forecast: 'Детална прогноза',
   printed_at: 'Отпечатено {time}',
@@ -70,7 +73,7 @@ const mk = {
   concern: {
     heavy_snow_coming: 'Обилен нов снег', recent_heavy_snow: 'Скорешен обилен снег', wind_drifting: 'Навеан снег',
     strong_wind: 'Силен ветер', rain_on_snow: 'Дожд врз снег', warming_after_snow: 'Затоплување по снежење'
-  } as Record<string, string>,
+  } satisfies Record<FlagCode, string>,
   why: {
     heavy_snow_coming: 'Обилниот нов снег е најчеста причина за лавини во првите денови по снежење.',
     recent_heavy_snow: 'На новиот снег му требаат неколку дена да се стабилизира, особено на стрмни падини.',
@@ -78,9 +81,8 @@ const mk = {
     strong_wind: 'Силниот ветер го пренесува снегот и создава наноси на заветрените падини.',
     rain_on_snow: 'Дождот го натопува и оптоварува снежниот покривач и може да предизвика влажни лавини.',
     warming_after_snow: 'Затоплувањето по снежење ја намалува стабилноста на новиот снег, особено на сончеви падини.'
-  } as Record<string, string>,
+  } satisfies Record<FlagCode, string>,
   above_m: 'Над {m} m',
-  also: 'Исто така',
   summary_calm: 'Нема посебни временски појави во следните 72 часа.',
   issued_line: 'Издадено {issued}. Следно ажурирање {next}.',
   not_rating: 'Временска прогноза, не проценка на лавинската опасност.',
@@ -102,15 +104,14 @@ const mk = {
   tomorrow: 'Утре',
   day_rain_high: 'Дожд и на врвот',
   freezing_short: 'Нулта изотерма',
-  fl_above_all: 'Над сите точки: дожд или влажен снег до врвот.',
-  fl_below_all: 'Под сите точки: сув снег насекаде.',
-  fl_within: 'Минува низ планината: подолу влажно, погоре сув снег.',
   overnight: 'Ноќта (последни 12 ч)',
   overnight_line: '{snow} cm нов снег, ветер до {wind} km/h {from}, мин. {temp} °C',
   no_consensus: 'Во оваа прогноза не беа достапни доволно модели за споредба. Предупредувањата се од еден модел и се помалку сигурни.',
   model_missing: 'Еден модел не е користен ({models}); предупредувањата се од преостанатите.',
   offline: 'Без интернет. Прикажани се последните зачувани податоци ({time}).',
   stale: 'Внимание: прогнозата е постара од 24 часа ({time}). Проверете ја пред да тргнете.',
+  high_contrast: 'Јак контраст',
+  missed_issue: 'Прикажана е прогнозата од {time}. Веќе треба да има понова; ќе се прикаже кога врската ќе дозволи.',
   print_preparing: 'Се подготвува картата…',
   sheet_emergency: 'Итни случаи',
   sheet_112: 'Итни случаи и спасување во планина (ЦУК). Бесплатно, од секој телефон.',
@@ -125,7 +126,6 @@ const mk = {
   sheet_contact: 'Кој го знае планот и кога да алармира',
   agree: '{n} од {m} модели се согласуваат',
   range_models: 'модели: {lo}–{hi}',
-  last24: 'Последни 24 часа: {snow} cm нов снег, ветер до {wind} km/h, мин. {temp} °C.',
   follow: 'Следи',
   following: 'Следено',
   followed_title: 'Следени места',
@@ -200,6 +200,7 @@ const mk = {
   pilot: 'пилот',
   overview_note: 'Нов снег и ветер во следните 72 часа на највисоката точка.',
   tab_weather: 'Време',
+  tabs_label: 'Делови',
   tab_terrain: 'Терен',
   next72: 'Следни 72 часа',
   past72: 'Последни 72 часа',
@@ -209,8 +210,6 @@ const mk = {
   chart_summary: 'Истите вредности се во табелата „По денови“ подолу.',
   col_wind: 'Ветер',
   col_temp: '°C',
-  flag_past: 'досега',
-  flag_next: 'наскоро',
   flags: {
     heavy_snow_coming: 'Доаѓа обилен снег: {snow_cm} cm за 72 часа',
     recent_heavy_snow: '{snow_cm} cm нов снег во последните 72 часа',
@@ -218,7 +217,7 @@ const mk = {
     strong_wind: 'Силен ветер од {from}, до {wind_kmh} km/h',
     rain_on_snow: 'Дожд врз снег: {rain_mm} mm',
     warming_after_snow: 'Затоплување до {temp_max_c} °C по {snow_cm} cm снег'
-  } as Record<string, string>,
+  } satisfies Record<FlagCode, string>,
   days_title: 'По денови, {elev} m',
   today: 'Денес',
   col_day: 'Ден',
@@ -319,7 +318,6 @@ const en: Strings = {
     warming_after_snow: 'Warming after a snowfall weakens the new snow, especially on sunny slopes.'
   },
   above_m: 'Above {m} m',
-  also: 'Also',
   summary_calm: 'No notable weather over the next 72 hours.',
   issued_line: 'Issued {issued}. Next update {next}.',
   not_rating: 'A weather forecast, not an avalanche danger rating.',
@@ -341,15 +339,14 @@ const en: Strings = {
   tomorrow: 'Tomorrow',
   day_rain_high: 'Rain up to the top',
   freezing_short: 'Freezing level',
-  fl_above_all: 'Above all points: rain or wet snow up to the top.',
-  fl_below_all: 'Below all points: dry snow everywhere.',
-  fl_within: 'Crosses the mountain: wet lower down, dry snow higher up.',
   overnight: 'Overnight (last 12 h)',
   overnight_line: '{snow} cm new snow, wind up to {wind} km/h {from}, min. {temp} °C',
   no_consensus: 'Not enough models were available to compare in this forecast. Alerts come from a single model and are less certain.',
   model_missing: 'One model was not used ({models}); alerts come from the others.',
   offline: 'No connection. Showing the last saved data ({time}).',
   stale: 'Warning: this forecast is more than 24 hours old ({time}). Check it before you go.',
+  high_contrast: 'High contrast',
+  missed_issue: 'Showing the forecast from {time}. A newer forecast should be out; it will show when the connection allows.',
   print_preparing: 'Preparing the map…',
   sheet_emergency: 'Emergency',
   sheet_112: 'Emergencies and mountain rescue (Crisis Management Center, ЦУК). Free from any phone.',
@@ -364,7 +361,6 @@ const en: Strings = {
   sheet_contact: 'Who knows the plan, and when to raise the alarm',
   agree: '{n} of {m} models agree',
   range_models: 'models: {lo}–{hi}',
-  last24: 'Last 24 hours: {snow} cm new snow, wind up to {wind} km/h, min. {temp} °C.',
   follow: 'Follow',
   following: 'Following',
   followed_title: 'Followed places',
@@ -439,6 +435,7 @@ const en: Strings = {
   pilot: 'pilot',
   overview_note: 'New snow and wind over the next 72 hours at the highest point.',
   tab_weather: 'Weather',
+  tabs_label: 'Sections',
   tab_terrain: 'Terrain',
   next72: 'Next 72 hours',
   past72: 'Last 72 hours',
@@ -448,8 +445,6 @@ const en: Strings = {
   chart_summary: 'The same values are in the day-by-day table below.',
   col_wind: 'Wind',
   col_temp: '°C',
-  flag_past: 'so far',
-  flag_next: 'coming',
   flags: {
     heavy_snow_coming: 'Heavy snow coming: {snow_cm} cm in 72 hours',
     recent_heavy_snow: '{snow_cm} cm of new snow in the last 72 hours',
@@ -481,6 +476,6 @@ const en: Strings = {
 
 export const STRINGS: Record<Lang, Strings> = { mk, en };
 
-export function fill(template: string, values: Record<string, unknown>): string {
-  return template.replace(/\{(\w+)\}/g, (_, k) => String(values[k] ?? ''));
+export function fill(template: string, values: object): string {
+  return template.replace(/\{(\w+)\}/g, (_, k: string) => String((values as Record<string, unknown>)[k] ?? ''));
 }

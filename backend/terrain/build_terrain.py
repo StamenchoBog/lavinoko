@@ -23,6 +23,7 @@ import argparse
 import io
 import json
 import math
+import sys
 from pathlib import Path
 from urllib.error import HTTPError
 from urllib.request import urlretrieve
@@ -35,6 +36,10 @@ from pmtiles.writer import write as pmtiles_write
 from rasterio.enums import Resampling
 from rasterio.merge import merge
 from rasterio.windows import from_bounds
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # backend/, for the shared contract
+from contract import checked_json  # noqa: E402
+from contract.models import TerrainMeta  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]  # repository root
 CACHE = ROOT / "backend" / ".cache" / "dem"  # downloaded DEM tiles (not committed)
@@ -465,7 +470,7 @@ def build() -> dict:
         "aspect_legend": [{"label": n, "rgb": list(c)} for n, c in zip(ASPECT_NAMES, ASPECT_COLOURS, strict=True)],
         "stats": {"elevation_min_m": round(float(dem.min())), "elevation_max_m": round(float(dem.max()))},
     }
-    (OUT / "metadata.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2))
+    (OUT / "metadata.json").write_text(checked_json(TerrainMeta, meta, indent=2))
     for name, (c, d) in counts.items():
         size = sum((OUT / f).stat().st_size for f in (f"{name}.pmtiles", f"{name}-detail.pmtiles")) / 1e6
         print(f"{name}: {c} country tiles, {d} detail tiles, {size:.1f} MB")

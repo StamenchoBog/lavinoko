@@ -1,0 +1,9 @@
+{
+  "version": 8,
+  "name": "Test base map: no tiles, so nothing is drawn and nothing is fetched from outside",
+  "sources": {
+    "openmaptiles": { "type": "vector", "tiles": ["{base}/data/basemap/none/{z}/{x}/{y}.pbf"], "maxzoom": 0 }
+  },
+  "glyphs": "{base}/data/basemap/fonts/{fontstack}/{range}.pbf",
+  "layers": [{ "id": "background", "type": "background", "paint": { "background-color": "#f2efe9" } }]
+}

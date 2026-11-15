@@ -24,6 +24,9 @@ jobs:
           uvx ruff format --check .
       - name: Tests
         run: uv run --group dev pytest -q
+      # The frontend's types and data check are generated from backend/contract/models.py.
+      - name: Data contract up to date
+        run: uv run python -m contract.generate --check
 
   frontend:
     runs-on: ubuntu-latest
@@ -38,7 +41,25 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
-      - name: Type check
+      - name: Lint
+        run: npm run lint
+      - name: Type check (warnings fail too)
         run: npm run check
       - name: Build
         run: npm run build
+      - name: First page load under 100 KB
+        run: npm run size
+      # static/data/ is generated and not in git: the tests use the small copy in tests/fixtures/data.
+      - name: Test data
+        run: npm run test:data
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+      - name: Playwright tests
+        run: npm test
+      - name: Keep traces of failed tests
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: frontend/test-results/
+          retention-days: 7

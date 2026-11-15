@@ -3,15 +3,14 @@
   // create (after SLF "Caution Avalanches!", 2026): what, how long it lasts, where, what to look for.
   // Weather-based only: not a danger rating, and old weak layers can't be judged from weather.
   import { byHeight, num } from '$lib/format';
-  import { fill } from '$lib/i18n';
+  import { fill, type Problem } from '$lib/i18n';
   import { currentPlace, t } from '$lib/state.svelte';
-  import type { Compass, Flag } from '$lib/types';
+  import type { Compass, Flag, FlagCode } from '$lib/types';
   import AspectRose from '../AspectRose.svelte';
   import LevelBadge from '../LevelBadge.svelte';
-  import { flagText } from '$lib/flags';
+  import { flagKey, flagText } from '$lib/flags';
 
-  type Problem = 'new_snow' | 'wind_slab' | 'wet_snow';
-  const PROBLEM: Record<string, Problem> = {
+  const PROBLEM: Record<FlagCode, Problem> = {
     heavy_snow_coming: 'new_snow', recent_heavy_snow: 'new_snow',
     wind_drifting: 'wind_slab', strong_wind: 'wind_slab',
     rain_on_snow: 'wet_snow', warming_after_snow: 'wet_snow'
@@ -25,11 +24,11 @@
 
   // One card per problem: its most severe flag, the flags behind it, and the lowest elevation affected.
   const problems = $derived.by(() => {
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity -- built and read inside this $derived, never kept
     const m = new Map<Problem, { flag: Flag; codes: Set<string>; flags: Flag[]; from_m: number }>();
     for (const p of pts)
       for (const f of p.flags) {
         const k = PROBLEM[f.code];
-        if (!k) continue;
         const cur = m.get(k);
         if (!cur) m.set(k, { flag: f, codes: new Set([f.code]), flags: [f], from_m: p.elevation });
         else {
@@ -40,12 +39,14 @@
         }
       }
     const rank = (x: { flag: Flag }) => (x.flag.level === 'serious' ? 1 : 0);
-    return [...m.entries()].map(([k, v]) => ({ key: k, ...v })).sort((a, b) => rank(b) - rank(a));
+    return [...m.entries()].map(([k, v]) => ({ key: k, ...v, loads: loads(v.flag) })).sort((a, b) => rank(b) - rank(a));
   });
 
-  const lee = (f: Flag): Compass[] => {
-    const i = ORDER.indexOf(f.loads as Compass);
-    return i < 0 ? [] : [ORDER[(i + 7) % 8], ORDER[i], ORDER[(i + 1) % 8]];
+  /** The loaded slopes of a drifting-snow flag (other flags carry no aspect). */
+  const loads = (f: Flag): Compass | null => (f.code === 'wind_drifting' ? f.loads : null);
+  const lee = (c: Compass): Compass[] => {
+    const i = ORDER.indexOf(c);
+    return [ORDER[(i + 7) % 8]!, c, ORDER[(i + 1) % 8]!];
   };
 
   // New snow over the past 3 days plus the next 3, against the leaflet's critical amounts.
@@ -80,12 +81,12 @@
             {#if i > 0}<span class="fact">{flagText(p.flag, s)}</span>{/if}
           </span>
         </summary>
-        {#if p.key === 'wind_slab' && p.flag.loads}
-          <AspectRose aspects={lee(p.flag)} label={fill(s.above_m, { m: p.from_m })} />
+        {#if p.key === 'wind_slab' && p.loads}
+          <AspectRose aspects={lee(p.loads)} label={fill(s.above_m, { m: p.from_m })} />
         {:else}
           <p class="where"><b>{s.sit_where}:</b> {fill(s.above_m, { m: p.from_m })}. {s.prob[p.key].where}</p>
         {/if}
-        <ul class="facts">{#each p.flags as f (f.code + (f.period ?? ''))}<li>{flagText(f, s)}</li>{/each}</ul>
+        <ul class="facts">{#each p.flags as f (flagKey(f))}<li>{flagText(f, s)}</li>{/each}</ul>
         <p class="why">{s.prob[p.key].why}</p>
         <p class="look"><b>{s.sit_look}:</b> {s.prob[p.key].look}</p>
       </details>

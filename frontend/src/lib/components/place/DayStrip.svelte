@@ -1,15 +1,16 @@
 <script lang="ts">
+  import WindArrow from '../WindArrow.svelte';
   // Today and the next days at the selected point, as cards. In the afternoon the planning day is
   // tomorrow, so it is highlighted; in the morning, today.
-  import { COMPASS_DEG, num } from '$lib/format';
+  import { num } from '$lib/format';
   import { fill } from '$lib/i18n';
-  import { t, ui } from '$lib/state.svelte';
+  import { data, t } from '$lib/state.svelte';
   import type { Day, WeatherPoint } from '$lib/types';
 
   let { point }: { point: WeatherPoint } = $props();
   const s = $derived(t());
   const days = $derived(point.days.filter((d) => d.when !== 'past').slice(0, 4));
-  const th = $derived(ui.weather?.thresholds);
+  const th = $derived(data.weather?.thresholds);
 
   const skopjeHour = () => Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Skopje', hour: '2-digit', hour12: false }).format(new Date()));
   const focus = skopjeHour() >= 14 ? 1 : 0;
@@ -33,9 +34,7 @@
       <span class="name">{label(d, i)}</span>
       <span class="snow" class:zero={!d.snow_cm}>{num(d.snow_cm)}<small>&nbsp;cm</small></span>
       <span class="wind">
-        {#if d.wind_from}
-          <svg viewBox="0 0 16 16" aria-hidden="true" style="transform: rotate({COMPASS_DEG[d.wind_from] + 180}deg)"><path d="M8 1 13 9H9.5v6h-3V9H3z" /></svg>
-        {/if}{num(d.wind_max_kmh)} <small>{d.wind_from ?? ''}</small>
+        <WindArrow from={d.wind_from} size={11} />{num(d.wind_max_kmh)} <small>{d.wind_from ?? ''}</small>
       </span>
       <span class="temp">{num(d.temp_min_c)}…{num(d.temp_max_c)}°</span>
       <span class="fl" title={s.freezing_short}>0° {num(d.freezing_min_m)} m</span>
@@ -54,8 +53,7 @@
   .snow.zero { color: var(--muted); font-weight: 600; }
   .snow small { font-size: 11px; font-weight: 500; }
   .wind { font-size: 12.5px; font-weight: 650; white-space: nowrap; }
-  .wind svg { width: 11px; height: 11px; vertical-align: -1px; margin-right: 2px; fill: currentColor; }
   .wind small, .temp, .fl { font-size: 11.5px; color: var(--muted); font-weight: 500; }
   .temp { color: var(--ink); }
-  .mark { font-size: 11px; font-weight: 700; color: #8a5a00; line-height: 1.2; margin-top: 2px; }
+  .mark { font-size: 11px; font-weight: 700; color: var(--attention-ink); line-height: 1.2; margin-top: 2px; }
 </style>

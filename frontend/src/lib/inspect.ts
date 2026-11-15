@@ -34,15 +34,17 @@ export async function terrainAt(lat: number, lon: number): Promise<Terrain> {
   }
   const r = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lats.join(',')}&longitude=${lons.join(',')}`);
   if (!r.ok) throw new Error('elevation');
-  const z: number[] = (await r.json()).elevation;
+  const z = (await r.json()).elevation as number[] | undefined;
+  if (!z || z.length !== 9 || z.some((v) => typeof v !== 'number')) throw new Error('elevation');
+  const [z0, z1, z2, z3, z4, z5, z6, z7, z8] = z as [number, number, number, number, number, number, number, number, number];
   const dyM = STEP * 111320;
   const dxM = STEP * 111320 * Math.cos((lat * Math.PI) / 180);
   // Horn's method on the 3×3 window (rows north→south, columns west→east).
-  const dzdx = (z[2] + 2 * z[5] + z[8] - (z[0] + 2 * z[3] + z[6])) / (8 * dxM);
-  const dzdn = (z[0] + 2 * z[1] + z[2] - (z[6] + 2 * z[7] + z[8])) / (8 * dyM);
+  const dzdx = (z2 + 2 * z5 + z8 - (z0 + 2 * z3 + z6)) / (8 * dxM);
+  const dzdn = (z0 + 2 * z1 + z2 - (z6 + 2 * z7 + z8)) / (8 * dyM);
   const slope = (Math.atan(Math.hypot(dzdx, dzdn)) * 180) / Math.PI;
   const aspectDeg = ((Math.atan2(-dzdx, -dzdn) * 180) / Math.PI + 360) % 360;
-  return { elevation: Math.round(z[4]), slope, aspect: slope < 5 ? null : COMPASS[Math.round(aspectDeg / 45) % 8] };
+  return { elevation: Math.round(z4), slope, aspect: slope < 5 ? null : (COMPASS[Math.round(aspectDeg / 45) % 8] ?? null) };
 }
 
 /** The next 12 hours at the point and its real elevation: what matters for going in on foot or by helicopter. */

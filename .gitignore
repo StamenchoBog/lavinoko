@@ -1,10 +1,15 @@
+# Python
 .venv/
 __pycache__/
 .pytest_cache/
+.ruff_cache/
 backend/.cache/
 
-ROADMAP.md
+# Generated data: rebuild with the backend scripts (see README)
+frontend/static/data/
+archive/
+
+# Local only
 .cache/
-# Generated locally by the backend scripts — too large for git
-frontend/static/data/terrain/
-frontend/static/data/basemap/
+.DS_Store
+ROADMAP.md

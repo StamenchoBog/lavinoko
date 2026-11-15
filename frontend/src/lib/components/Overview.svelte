@@ -1,13 +1,14 @@
 <script lang="ts">
-  import { COMPASS_DEG, num } from '$lib/format';
+  import WindArrow from './WindArrow.svelte';
+  import { num } from '$lib/format';
   import { fill } from '$lib/i18n';
-  import { selectPlace, t, toggleFollow, ui } from '$lib/state.svelte';
+  import { data, selectPlace, t, ui } from '$lib/state.svelte';
   import type { Place } from '$lib/types';
   import LevelBadge from './LevelBadge.svelte';
 
   const s = $derived(t());
   const groups = $derived.by(() => {
-    const places = ui.weather?.places ?? [];
+    const places = data.weather?.places ?? [];
     // Most severe first, then pilot, then most new snow, then alphabetical.
     const rank = { serious: 2, attention: 1, none: 0 };
     const order = (a: Place, b: Place) =>
@@ -27,17 +28,17 @@
   const RANK = { none: 0, attention: 1, serious: 2 } as const;
   let rose = $state(new Set<string>());
   $effect(() => {
-    const places = ui.weather?.places;
+    const places = data.weather?.places;
     if (!places) return;
     let seen: Record<string, keyof typeof RANK> = {};
     try { seen = JSON.parse(localStorage.getItem(SEEN) ?? '{}'); } catch { /* first visit */ }
-    rose = new Set(places.filter((p) => seen[p.id] && RANK[p.level] > RANK[seen[p.id]]).map((p) => p.id));
+    rose = new Set(places.filter((p) => { const before = seen[p.id]; return before !== undefined && RANK[p.level] > RANK[before]; }).map((p) => p.id));
     try { localStorage.setItem(SEEN, JSON.stringify(Object.fromEntries(places.map((p) => [p.id, p.level])))); } catch { /* private mode */ }
   });
 
   const counts = $derived({
-    serious: (ui.weather?.places ?? []).filter((p) => p.level === 'serious').length,
-    attention: (ui.weather?.places ?? []).filter((p) => p.level === 'attention').length
+    serious: (data.weather?.places ?? []).filter((p) => p.level === 'serious').length,
+    attention: (data.weather?.places ?? []).filter((p) => p.level === 'attention').length
   });
 </script>
 
@@ -63,11 +64,7 @@
           </span>
           <span class="snow" class:zero={!h.snow_next72_cm}>{num(h.snow_next72_cm)}<small>&nbsp;cm</small></span>
           <span class="wind">
-            {#if h.wind_next72.from}
-              <svg viewBox="0 0 16 16" aria-hidden="true" style="transform: rotate({COMPASS_DEG[h.wind_next72.from] + 180}deg)">
-                <path d="M8 1 13 9H9.5v6h-3V9H3z" fill="currentColor" />
-              </svg>
-            {/if}{num(h.wind_next72.max_kmh)}
+            <WindArrow from={h.wind_next72.from} size={12} />{num(h.wind_next72.max_kmh)}
           </span>
           <span class="lvl"><LevelBadge level={p.level} compact /></span>
         </button>
@@ -94,10 +91,9 @@
   .snow.zero { color: var(--muted); font-weight: 600; }
   .snow small { font-size: 11px; font-weight: 500; }
   .wind { font-size: 13px; font-weight: 600; text-align: right; white-space: nowrap; }
-  .wind svg { width: 12px; height: 12px; vertical-align: -1px; margin-right: 3px; }
   .lvl { display: flex; justify-content: center; }
   .banner { display: flex; gap: 8px; align-items: center; margin: 0 0 8px; padding: 8px 10px; border-radius: 8px; font-size: 14px; font-weight: 600; }
   .banner.serious { background: var(--serious-bg); color: var(--serious); }
-  .banner.attention { background: var(--signal-bg); color: #7a5200; }
+  .banner.attention { background: var(--signal-bg); color: var(--attention-ink); }
   .banner.calm { background: var(--tint); color: var(--ink); font-weight: 500; }
 </style>

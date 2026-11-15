@@ -1,18 +1,25 @@
 <script lang="ts">
   // Hour-by-hour forecast for one point: stacked panels on one shared time axis
   // (new snow, rain, temperature, ridge wind). One scale per panel, never two in one.
-  import { base } from '$app/paths';
+  import { loadData } from '$lib/data';
   import { dayLabel, num } from '$lib/format';
   import { fill } from '$lib/i18n';
-  import { t, ui } from '$lib/state.svelte';
+  import { t } from '$lib/state.svelte';
   import type { HourlyPoint } from '$lib/types';
 
   let { placeId, pointId }: { placeId: string; pointId: string } = $props();
 
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity -- a plain cache, nothing renders from it
   const cache = new Map<string, Promise<HourlyPoint[]>>();
   function load(id: string) {
     if (!cache.has(id)) {
-      cache.set(id, fetch(`${base}/data/hourly/${id}.json`).then((r) => r.json()).then((d) => d.points as HourlyPoint[]));
+      cache.set(
+        id,
+        loadData('hourly', `hourly/${id}.json`).then((d) => {
+          if (!d) cache.delete(id); // try again next time
+          return d?.points ?? [];
+        })
+      );
     }
     return cache.get(id)!;
   }
@@ -91,13 +98,14 @@
   const readout = $derived.by(() => {
     if (!h || hover === null) return null;
     const i = hover, tm = h.time[i];
+    if (tm === undefined) return null;
     const s3 = snow.find((d) => i >= d.i && i < d.i + STEP);
     const r3 = rain.find((d) => i >= d.i && i < d.i + STEP);
     return {
       left: Math.min(Math.max(x(i) - 70, 0), width - 140),
       when: `${dayLabel(tm.slice(0, 10), s.weekdays)} ${tm.slice(11, 16)}`,
       snow: s3?.v ?? 0, rain: r3?.v ?? 0,
-      temp: h.temp_c[i], wind: h.wind_kmh[i], dir: dirLabel(h.wind_dir[i])
+      temp: h.temp_c[i], wind: h.wind_kmh[i], dir: dirLabel(h.wind_dir[i] ?? null)
     };
   });
 </script>

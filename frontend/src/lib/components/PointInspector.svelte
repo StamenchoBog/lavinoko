@@ -3,7 +3,7 @@
   import { num } from '$lib/format';
   import { fill } from '$lib/i18n';
   import { compassOf, terrainAt, toDms, weatherAt, type HourRow, type Terrain } from '$lib/inspect';
-  import { t, ui } from '$lib/state.svelte';
+  import { data, t, ui } from '$lib/state.svelte';
 
   const s = $derived(t());
   const pt = $derived(ui.inspect);
@@ -32,7 +32,7 @@
   const nearest = $derived.by(() => {
     if (!pt) return null;
     let best: { name: string; km: number } | null = null;
-    for (const pl of ui.weather?.places ?? []) {
+    for (const pl of data.weather?.places ?? []) {
       const km = Math.hypot((pl.center[0] - pt.lon) * 111 * Math.cos((pt.lat * Math.PI) / 180), (pl.center[1] - pt.lat) * 111);
       if (!best || km < best.km) best = { name: pl.name[ui.lang], km };
     }
@@ -121,8 +121,13 @@
   td { text-align: right; padding: 3px; border-top: 1px solid var(--line); white-space: nowrap; }
   th:first-child, td:first-child { text-align: left; }
   td.low { color: var(--serious); font-weight: 700; }
+  /* Touch screens (gloves): at least 48 px targets. */
+  @media (pointer: coarse) {
+    .x { min-width: 48px; min-height: 48px; margin: -8px -8px -8px 0; }
+    .copy { min-height: 48px; padding: 4px 16px; font-size: 14px; }
+  }
   @media (max-width: 560px) {
-    .card { left: 8px; right: 8px; width: auto; top: 8px; max-height: 44%; }
+    .card { left: 0; right: 0; bottom: 0; top: auto; width: auto; max-height: 55%; border-radius: 14px 14px 0 0; }
   }
   @media print { .card { display: none; } }
 </style>

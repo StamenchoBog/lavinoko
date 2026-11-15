@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { fill } from '$lib/i18n';
   import { ROLES, store, type Report, type Role } from '$lib/reports';
-  import { currentPlace, t, ui } from '$lib/state.svelte';
+  import { data, currentPlace, t, ui } from '$lib/state.svelte';
   import ReportForm from './ReportForm.svelte';
 
   const s = $derived(t());
@@ -13,15 +13,15 @@
   let notice = $state('');
 
   export async function refresh() {
-    ui.reports = await store.list();
-    ui.observer = await store.observer();
+    data.reports = await store.list();
+    data.observer = await store.observer();
   }
   onMount(refresh);
 
   const shown = $derived.by(() => {
-    if (!place) return ui.reports;
+    if (!place) return data.reports;
     const [lon, lat] = place.center;
-    return ui.reports.filter((r) => {
+    return data.reports.filter((r) => {
       const dx = (r.lon - lon) * 111 * Math.cos((lat * Math.PI) / 180);
       return r.place_id === place.id || Math.hypot(dx, (r.lat - lat) * 111) < 10;
     });
@@ -33,7 +33,7 @@
     if (min < 48 * 60) return fill(s.ago_hour, { n: Math.round(min / 60) });
     return fill(s.ago_day, { n: Math.round(min / 1440) });
   }
-  const placeName = (r: Report) => ui.weather?.places.find((p) => p.id === r.place_id)?.name[ui.lang] ?? '';
+  const placeName = (r: Report) => (r.place_id ? data.placesById.get(r.place_id)?.name[ui.lang] : undefined) ?? '';
 
   async function signIn() {
     await store.signIn({ role, organisation: organisation.trim() || null });
@@ -61,10 +61,10 @@
 {#if ui.reportForm}
   <ReportForm onDone={done} />
 {:else}
-  {#if ui.observer}
+  {#if data.observer}
     <div class="me">
       <button class="primary" onclick={() => ((ui.reportForm = true), (notice = ''))}>{s.report_new}</button>
-      <span class="small">{fill(s.signed_in_as, { role: s.roles[ui.observer.role] })} · <button class="link" onclick={signOut}>{s.sign_out}</button></span>
+      <span class="small">{fill(s.signed_in_as, { role: s.roles[data.observer.role] })} · <button class="link" onclick={signOut}>{s.sign_out}</button></span>
     </div>
   {/if}
   {#if notice}<p class="notice" role="status">{notice}</p>{/if}
@@ -83,13 +83,13 @@
       </p>
       {#if r.note}<p class="note">{r.note}</p>{/if}
       {#if r.photo}<img src={r.photo} alt="" loading="lazy" />{/if}
-      {#if store.mode === 'local' && ui.observer}<button class="link" onclick={() => remove(r.id)}>{s.report_delete}</button>{/if}
+      {#if store.mode === 'local' && data.observer}<button class="link" onclick={() => remove(r.id)}>{s.report_delete}</button>{/if}
     </article>
   {:else}
     <p class="small">{s.reports_empty}</p>
   {/each}
 
-  {#if !ui.observer}
+  {#if !data.observer}
     <details class="signin">
       <summary>{s.signin_title}</summary>
       <p class="small">{s.signin_text}</p>

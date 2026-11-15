@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { MapPicture } from '$lib/mapHandle';
-  import { t, ui } from '$lib/state.svelte';
+  import { data, t } from '$lib/state.svelte';
 
   let { pic, labels }: { pic: MapPicture | null; labels: string[] } = $props();
   const s = $derived(t());
@@ -8,7 +8,6 @@
   // The overlay uses the picture's own pixel space, so grid and points line up exactly.
   const W = $derived(pic?.width ?? 1600);
   const H = $derived(pic?.height ?? 724);
-  const FONT = 21; // ≈ 7 pt on the 190 mm wide frame
 
   const decimals = $derived(pic ? (pic.step < 0.01 ? 3 : pic.step < 0.1 ? 2 : 1) : 2);
 
@@ -66,7 +65,7 @@
   </div>
   <figcaption>
     <span class="lg"><b>{s.map_legend}</b>
-      {#each ui.meta?.slope_legend ?? [] as c (c.label)}
+      {#each data.meta?.slope_legend ?? [] as c (c.label)}
         <span><i style="background: rgba({c.rgba.slice(0, 3).join(',')}, {Math.min(1, c.rgba[3] / 200)})"></i>{c.label}</span>
       {/each}
     </span>

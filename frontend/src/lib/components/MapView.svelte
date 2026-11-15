@@ -2,9 +2,9 @@
   // The map. MapLibre is loaded only after the panel is on screen, so the forecast shows first.
   import { onMount } from 'svelte';
   import { base } from '$app/paths';
-  import type { Map as MlMap, Marker, StyleSpecification } from 'maplibre-gl';
+  import type { FilterSpecification, Map as MlMap, Marker, StyleSpecification } from 'maplibre-gl';
   import { mapHandle, type GridLine, type MapPicture, type SnapshotRequest } from '$lib/mapHandle';
-  import { currentPlace, selectPlace, t, ui } from '$lib/state.svelte';
+  import { data, currentPlace, selectPlace, t, ui } from '$lib/state.svelte';
 
   let { dataBase }: { dataBase: string } = $props();
 
@@ -15,6 +15,7 @@
   const placeMarkers: Record<string, { marker: Marker; el: HTMLElement }> = {};
   let pointMarkers: { marker: Marker; el: HTMLElement; id: string }[] = [];
   let firstRun = true;
+  let sharedView = false; // the address bar already had a map position when the page opened
   let reportMarkers: Marker[] = [];
   let draftMarker: Marker | null = null;
 
@@ -38,16 +39,18 @@
       maplibregl.addProtocol('pmtiles', new Protocol().tile);
       MarkerClass = maplibregl.Marker;
 
-      const meta = ui.meta!;
+      const meta = data.meta!;
       const style = await baseMapStyle();
       if (cancelled) return;
       const [w, s, e, n] = meta.bounds;
+      sharedView = /^#[\d.]+\//.test(location.hash);
       created = new maplibregl.Map({
         container,
         bounds: [w + 0.2, s + 0.1, e - 0.2, n - 0.1],
         fitBoundsOptions: { padding: panelPadding() },
-        maxBounds: [[w - 0.6, s - 0.4], [e + 0.6, n + 0.4]],
-        minZoom: 7,
+        // A tall phone screen (half of it under the panel) needs more room north and south to show the whole country.
+        maxBounds: narrow() ? [[w - 0.6, s - 2], [e + 0.6, n + 1]] : [[w - 0.6, s - 0.4], [e + 0.6, n + 0.4]],
+        minZoom: narrow() ? 6.5 : 7, // a phone needs to zoom out further to fit the whole country
         maxZoom: 16,
         hash: true, // map position in the address bar, so a view can be shared
         style,
@@ -201,7 +204,7 @@
 
   function addLayers() {
     const m = map!;
-    const meta = ui.meta!;
+    const meta = data.meta!;
     // Overlays go below the first label layer so place names stay readable.
     const firstLabel = m.getStyle().layers.find((l) => l.type === 'symbol')?.id;
     const abs = new URL(dataBase, location.href).href;
@@ -297,8 +300,11 @@
     });
   }
 
+  /** Invisible padding left of a place symbol: with it the tap target is 48 px, and the symbol stays on the place. */
+  const MARKER_PAD = 18;
+
   function addPlaceMarkers() {
-    for (const p of ui.weather?.places ?? []) {
+    for (const p of data.weather?.places ?? []) {
       const el = document.createElement('button');
       el.className = `place-marker ${p.kind}`;
       el.innerHTML = '<i></i><span></span>';
@@ -308,7 +314,7 @@
         if (ui.reportForm) ui.draftPoint = { lat: p.center[1], lon: p.center[0] };
         else selectPlace(p.id);
       });
-      placeMarkers[p.id] = { el, marker: new MarkerClass({ element: el, anchor: 'left', offset: [-6, 0] }).setLngLat(p.center).addTo(map!) };
+      placeMarkers[p.id] = { el, marker: new MarkerClass({ element: el, anchor: 'left', offset: [-MARKER_PAD - 6, 0] }).setLngLat(p.center).addTo(map!) };
     }
     const m = map!;
     const labels = () => container.classList.toggle('far', m.getZoom() < (narrow() ? 9.5 : 8.6));
@@ -318,7 +324,7 @@
 
   $effect(() => {
     if (!map) return;
-    for (const p of ui.weather?.places ?? []) {
+    for (const p of data.weather?.places ?? []) {
       const m = placeMarkers[p.id];
       if (!m) continue;
       const snow = p.headline.snow_next72_cm;
@@ -333,6 +339,21 @@
     }
   });
 
+  /** Hide peak labels right under a forecast-point pill: the pill marks that summit and shows its height. */
+  function setPeakFilter(points: { lon: number; lat: number }[] | null) {
+    if (!map?.getLayer('outdoor-peaks')) return;
+    if (!points?.length) {
+      map.setFilter('outdoor-peaks', ['has', 'ele']);
+      return;
+    }
+    const box = (lon: number, lat: number) => {
+      const dx = 0.005, dy = 0.003; // about 400 m by 330 m
+      return [[[lon - dx, lat - dy], [lon + dx, lat - dy], [lon + dx, lat + dy], [lon - dx, lat + dy], [lon - dx, lat - dy]]];
+    };
+    const near = { type: 'MultiPolygon', coordinates: points.map((p) => box(p.lon, p.lat)) };
+    map.setFilter('outdoor-peaks', ['all', ['has', 'ele'], ['!', ['within', near]]] as FilterSpecification);
+  }
+
   $effect(() => {
     const place = currentPlace();
     if (!map) return;
@@ -341,17 +362,20 @@
     const first = firstRun;
     firstRun = false;
     if (!place) {
-      // On first load the map already shows the country (or the shared position in the address bar).
-      if (!first) {
-        const [w, s, e, n] = ui.meta!.bounds;
-        map.fitBounds([w + 0.2, s + 0.1, e - 0.2, n - 0.1], { duration: 600, padding: panelPadding() });
+      // On first load keep a shared position from the address bar; otherwise fit the country again,
+      // because the map's first fit ran before its container had its final size.
+      setPeakFilter(null);
+      if (!first || !sharedView) {
+        const [w, s, e, n] = data.meta!.bounds;
+        map.fitBounds([w + 0.2, s + 0.1, e - 0.2, n - 0.1], { duration: first ? 0 : 600, padding: 0 });
       }
       return;
     }
     for (const p of place.points) {
       const el = document.createElement('button');
       el.className = 'wx-marker';
-      el.textContent = `${p.elevation} m`;
+      // The pill is drawn by the span; the button around it is the 48 px tap target.
+      el.append(Object.assign(document.createElement('span'), { textContent: `${p.elevation} m` }));
       el.setAttribute('aria-label', `${p.name[ui.lang]}, ${p.elevation} m`);
       el.addEventListener('click', (ev) => {
         ev.stopPropagation();
@@ -367,7 +391,12 @@
       const offset: [number, number] = twin.length > 1 ? [0, (twin.indexOf(p) - (twin.length - 1) / 2) * 26] : [0, 0];
       pointMarkers.push({ el, id: p.id, marker: new MarkerClass({ element: el, offset }).setLngLat([p.lon, p.lat]).addTo(map) });
     }
-    map.flyTo({ center: place.center, zoom: 13, duration: 900, essential: true });
+    setPeakFilter(place.points);
+    // Zoom 13 around the place, but zoom out if needed so every forecast point stays on screen (narrow phones).
+    const lons = [place.center[0], ...place.points.map((p) => p.lon)];
+    const lats = [place.center[1], ...place.points.map((p) => p.lat)];
+    const cam = map.cameraForBounds([Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)], { padding: { top: 50, bottom: 50, left: 60, right: 90 }, maxZoom: 13 } /* right: clear of the map buttons */);
+    map.flyTo({ center: cam?.center ?? place.center, zoom: Math.max(12, cam?.zoom ?? 13), /* the base map has ski lifts from zoom 12 */ duration: 900, essential: true });
   });
 
   $effect(() => {
@@ -376,7 +405,7 @@
   });
 
   $effect(() => {
-    const reports = ui.reports;
+    const reports = data.reports;
     if (!map) return;
     for (const m of reportMarkers) m.remove();
     reportMarkers = reports.map((r) => {
@@ -399,6 +428,14 @@
     if (!map) return;
     inspectMarker?.remove();
     inspectMarker = p ? new MarkerClass({ color: '#b3261e' }).setLngLat([p.lon, p.lat]).addTo(map) : null;
+    // On phones the point card covers the lower half: keep the pin in view above it.
+    if (p && narrow()) map.easeTo({ center: [p.lon, p.lat], padding: { top: 20, left: 10, right: 10, bottom: Math.round(innerHeight * 0.55) }, duration: 400 });
+    else if (!p) {
+      // setPadding() jumps the camera and would cancel a running flyTo (e.g. opening a ?place= link), so only reset when needed.
+      const want = panelPadding();
+      const have = map.getPadding();
+      if ((['top', 'right', 'bottom', 'left'] as const).some((k) => want[k] !== have[k])) map.setPadding(want);
+    }
   });
 
   $effect(() => {
@@ -465,14 +502,18 @@
   @media (prefers-reduced-motion: reduce) { .rose svg { transition: none; } }
   @media print { .rose { display: none; } }
   :global(.wx-marker) {
-    border-radius: 12px; padding: 2px 8px; font: 700 12px system-ui, sans-serif; cursor: pointer;
+    display: grid; place-items: center; min-height: 48px; padding: 0 4px; border: 0; background: none; cursor: pointer;
+  }
+  :global(.wx-marker span) {
+    border-radius: 12px; padding: 2px 8px; font: 700 12px system-ui, sans-serif;
     white-space: nowrap; box-shadow: 0 1px 4px #0003; background: #fff; border: 2px solid var(--ink); color: var(--ink);
   }
-  :global(.wx-marker.on) { background: var(--glacier); border-color: var(--glacier); color: #fff; }
+  :global(.wx-marker.on span) { background: var(--glacier); border-color: var(--glacier); color: #fff; }
 
   /* Places: a symbol (circle = ski area, triangle = summit) with the name beside it. */
   :global(.place-marker) {
-    display: flex; align-items: center; gap: 4px; border: 0; background: none; padding: 0; cursor: pointer;
+    display: flex; align-items: center; gap: 4px; border: 0; background: none; cursor: pointer;
+    min-height: 48px; padding: 0 18px; /* 18 px = MARKER_PAD: a 48 px target around a 12 px symbol */
     font: 700 12px system-ui, sans-serif; color: var(--ink); white-space: nowrap;
   }
   :global(.place-marker i) {
@@ -498,5 +539,11 @@
   :global(.report-marker.avalanche) { background: var(--ink); width: 15px; height: 15px; }
   @media (max-width: 560px) {
     :global(.maplibregl-ctrl-bottom-right) { display: none; }
+  }
+  /* Touch screens (gloves): 48 px map buttons; the compass moves down below them. */
+  @media (pointer: coarse) {
+    /* More specific than MapLibre's own rule, which loads after this one. */
+    :global(.maplibregl-ctrl.maplibregl-ctrl-group button) { width: 48px; height: 48px; }
+    .rose { top: 174px; width: 48px; height: 48px; }
   }
 </style>

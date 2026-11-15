@@ -17,10 +17,15 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # backend/, for the shared contract
+from contract import ContractError, checked_json  # noqa: E402
+from contract.models import Hourly, Sources, Weather  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]  # repository root
 REGIONS = json.loads((ROOT / "config" / "regions.json").read_text())
@@ -546,16 +551,25 @@ def build(now_utc: datetime | None = None) -> dict:
         "thresholds": T,
         "places": out_places,
     }
-    WEB.mkdir(parents=True, exist_ok=True)
-    (WEB / "weather.json").write_text(json.dumps(result, ensure_ascii=False, separators=(",", ":")))
-    # Hourly series per place, loaded only when someone opens that place.
-    (WEB / "hourly").mkdir(exist_ok=True)
-    for pid, pts in hourly.items():
-        (WEB / "hourly" / f"{pid}.json").write_text(
-            json.dumps({"issued_utc": issued, "points": pts}, separators=(",", ":"))
-        )
-    # The source register travels with the data, so the page can show credits and licences.
-    (WEB / "sources.json").write_text((ROOT / "config" / "sources.json").read_text())
+    # Every file is checked against the data contract before any is written, so a run that would
+    # break the page publishes nothing and the last good files stay.
+    compact = {"separators": (",", ":")}
+    try:
+        files = {
+            "weather.json": checked_json(Weather, result, **compact),
+            # Hourly series per place, loaded only when someone opens that place.
+            **{
+                f"hourly/{pid}.json": checked_json(Hourly, {"issued_utc": issued, "points": pts}, **compact)
+                for pid, pts in hourly.items()
+            },
+            # The source register travels with the data, so the page can show credits and licences.
+            "sources.json": checked_json(Sources, json.loads((ROOT / "config" / "sources.json").read_text()), indent=1),
+        }
+    except ContractError as e:
+        raise DataError(str(e)) from e
+    (WEB / "hourly").mkdir(parents=True, exist_ok=True)
+    for name, text in files.items():
+        (WEB / name).write_text(text)
 
     # Keep the full hourly forecast as issued, for verification later.
     ARCHIVE.mkdir(parents=True, exist_ok=True)

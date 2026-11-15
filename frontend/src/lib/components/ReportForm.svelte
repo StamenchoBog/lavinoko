@@ -2,7 +2,7 @@
   import { COMPASS_DEG } from '$lib/format';
   import { fill } from '$lib/i18n';
   import { KINDS, preparePhoto, store, type Kind } from '$lib/reports';
-  import { t, ui } from '$lib/state.svelte';
+  import { data, t, ui } from '$lib/state.svelte';
   import type { Compass } from '$lib/types';
 
   let { onDone }: { onDone: (saved: boolean) => void } = $props();
@@ -51,7 +51,7 @@
   /** Nearest place within 10 km, so reports can be listed under a place. */
   function nearestPlace(lat: number, lon: number): string | null {
     let best: { id: string; d: number } | null = null;
-    for (const p of ui.weather?.places ?? []) {
+    for (const p of data.weather?.places ?? []) {
       const dx = (p.center[0] - lon) * 111 * Math.cos((lat * Math.PI) / 180);
       const dy = (p.center[1] - lat) * 111;
       const d = Math.hypot(dx, dy);

@@ -23,7 +23,7 @@
 <style>
   .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; white-space: nowrap; }
   .badge svg { width: 15px; height: 15px; flex: none; }
-  .attention { color: #8a5a00; }
+  .attention { color: var(--attention-ink); }
   .attention svg { color: var(--signal); }
   .serious { color: var(--serious); }
 </style>

@@ -1,6 +1,7 @@
 <script lang="ts">
+  import WindArrow from './WindArrow.svelte';
   // One row per forecast point, summit on top, like the mountain itself.
-  import { byHeight, COMPASS_DEG, num } from '$lib/format';
+  import { byHeight, num } from '$lib/format';
   import { fill } from '$lib/i18n';
   import { currentPlace, t, ui } from '$lib/state.svelte';
   import type { WeatherPoint } from '$lib/types';
@@ -29,7 +30,7 @@
   <tbody>
     {#each points as p, i (p.id)}
       {@const d = p[period]}
-      {#if fl && fl.lo > p.elevation && (i === 0 || fl.lo <= points[i - 1].elevation)}
+      {#if fl && fl.lo > p.elevation && (i === 0 || fl.lo <= (points[i - 1]?.elevation ?? Infinity))}
         <tr class="fl" aria-hidden="true"><td colspan="4"><span>{fill(s.fl_row, { lo: num(fl.lo), hi: num(fl.hi) })}</span></td></tr>
       {/if}
       {@const rng = p.spread ? (period === 'next72' ? p.spread.snow_next72_cm : p.spread.snow_past72_cm) : null}
@@ -45,18 +46,13 @@
           {#if rng && rng[1] - rng[0] >= 1}<span class="range">{fill(s.range_models, { lo: num(rng[0]), hi: num(rng[1]) })}</span>{/if}
         </td>
         <td class="wind">
-          {#if d.wind.from}
-            <!-- Arrow points where the wind blows to. -->
-            <svg viewBox="0 0 16 16" aria-hidden="true" style="transform: rotate({COMPASS_DEG[d.wind.from] + 180}deg)">
-              <path d="M8 1 13 9H9.5v6h-3V9H3z" fill="currentColor" />
-            </svg>
-          {/if}
+          <WindArrow from={d.wind.from} size={14} />
           {num(d.wind.max_kmh)} <small>{d.wind.from ? d.wind.from : ''}</small>
         </td>
         <td class="temp">{num(d.temp_min_c)}…{num(d.temp_max_c)}</td>
       </tr>
     {/each}
-    {#if fl && fl.lo <= points[points.length - 1].elevation}
+    {#if fl && fl.lo <= (points.at(-1)?.elevation ?? -Infinity)}
       <tr class="fl" aria-hidden="true"><td colspan="4"><span>{fill(s.fl_row, { lo: num(fl.lo), hi: num(fl.hi) })}</span></td></tr>
     {/if}
   </tbody>
@@ -80,7 +76,6 @@
   .snow small { font-size: 12px; font-weight: 500; }
   .range { display: block; font-size: 11px; color: var(--muted); white-space: nowrap; }
   .wind { white-space: nowrap; font-weight: 600; }
-  .wind svg { width: 14px; height: 14px; vertical-align: -2px; margin-right: 3px; }
   .wind small { color: var(--muted); font-weight: 500; }
   .temp { white-space: nowrap; }
   tr.fl td { padding: 0; border-top: 0; text-align: left; }

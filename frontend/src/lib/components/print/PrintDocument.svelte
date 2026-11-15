@@ -6,7 +6,7 @@
   import { byHeight, COMPASS_DEG, dayLabel, nextIssue, num, skopjeTime } from '$lib/format';
   import { fill } from '$lib/i18n';
   import { resetAfterPrint } from '$lib/printing';
-  import { currentPlace, t, ui } from '$lib/state.svelte';
+  import { currentPlace, data, print, t, ui } from '$lib/state.svelte';
   import type { Compass, Flag } from '$lib/types';
   import LevelBadge from '../LevelBadge.svelte';
   import PrintChart from './PrintChart.svelte';
@@ -16,9 +16,10 @@
   const place = $derived(currentPlace());
   const points = $derived(place ? byHeight(place.points) : []);
   const top = $derived(points[0]);
-  const pages = $derived(ui.printMode === 'full' ? 2 : 1);
+  const pages = $derived(print.mode === 'full' ? 2 : 1);
 
   const concerns = $derived.by(() => {
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity -- built and read inside this $derived, never kept
     const seen = new Map<string, Flag>();
     for (const p of points)
       for (const f of p.flags) {
@@ -29,8 +30,8 @@
   });
 
   const days = $derived(top ? top.days.filter((d) => d.when !== 'past').slice(0, 4) : []);
-  const hourlyTop = $derived(ui.printHourly?.find((h) => h.id === top?.id) ?? null);
-  const elevSpan = $derived(points.length ? `${points[points.length - 1].elevation}–${points[0].elevation} m` : '');
+  const hourlyTop = $derived(print.hourly?.find((h) => h.id === top?.id) ?? null);
+  const elevSpan = $derived(points[0] ? `${points.at(-1)?.elevation}–${points[0].elevation} m` : '');
   const coord = (lat: number, lon: number) =>
     `${lat.toFixed(5)}° N, ${lon.toFixed(5)}° E`;
   const range = (r: [number, number] | undefined) => (r && r[1] - r[0] >= 1 ? fill(s.range_models, { lo: num(r[0]), hi: num(r[1]) }) : '');
@@ -55,9 +56,9 @@
     liveUrl = `${location.origin}${base}/?place=${place.id}&lang=${ui.lang}`;
     const url = liveUrl;
     import('uqr').then(({ encode }) => {
-      const { size, data } = encode(url, { ecc: 'M', border: 0 });
+      const { size, data: cells } = encode(url, { ecc: 'M', border: 0 });
       let path = '';
-      data.forEach((row, y) => row.forEach((on, x) => on && (path += `M${x},${y}h1v1h-1z`)));
+      cells.forEach((row, y) => row.forEach((on, x) => on && (path += `M${x},${y}h1v1h-1z`)));
       if (url === liveUrl) qr = { size, path };
     });
   });
@@ -83,7 +84,7 @@
         <p class="sub">{place?.range[ui.lang]} · {elevSpan}</p>
       </div>
       <div class="meta">
-        <p>{fill(s.issued_short, { issued: ui.weather ? skopjeTime(ui.weather.issued_utc) : '', next: nextIssue() })}</p>
+        <p>{fill(s.issued_short, { issued: data.weather ? skopjeTime(data.weather.issued_utc) : '', next: nextIssue() })}</p>
         <p>{fill(s.printed_at, { time: printedAt })}</p>
       </div>
     </div>
@@ -106,7 +107,7 @@
   <footer>
     <div class="credits">
       <p>{s.disclaimer}</p>
-      <p>Weather data by Open-Meteo.com (CC BY 4.0). {ui.meta?.source}. Map: © OpenMapTiles © OpenStreetMap contributors (ODbL).</p>
+      <p>Weather data by Open-Meteo.com (CC BY 4.0). {data.meta?.source}. Map: © OpenMapTiles © OpenStreetMap contributors (ODbL).</p>
     </div>
     {#if qr}
       <div class="qr">
@@ -130,7 +131,7 @@
         <div><span class="lbl">{s.stat_temp}</span><b>{num(top.next72.temp_min_c)}<small>…{num(top.next72.temp_max_c)} °C</small></b><span class="sm">{top.elevation} m</span></div>
       </div>
 
-      <PrintMap pic={ui.printMap} labels={points.map((p) => `${p.elevation} m`)} />
+      <PrintMap pic={print.map} labels={points.map((p) => `${p.elevation} m`)} />
 
       <div class="cols">
         <div>
@@ -195,7 +196,7 @@
       {@render footer()}
     </section>
 
-    {#if ui.printMode === 'full'}
+    {#if print.mode === 'full'}
       <section class="page">
         {@render header(2, s.doc_forecast, true)}
 
