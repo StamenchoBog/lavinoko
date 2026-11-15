@@ -56,6 +56,34 @@
       "terms_url": "https://github.com/openmaptiles/openmaptiles#license",
       "notes": "Built with backend/basemap/build_basemap.py (Planetiler). Falls back to tiles.openfreemap.org if not built.",
       "checked": "2026-11-14"
+    },
+    {
+      "id": "esa-worldcover",
+      "name": "ESA WorldCover 2021",
+      "used_for": {
+        "mk": "Шума, за нацрт-класите на лавински терен (ATES)",
+        "en": "Forest, for the draft avalanche terrain classes (ATES)"
+      },
+      "licence": "CC BY 4.0",
+      "credit": "© ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium",
+      "url": "https://esa-worldcover.org/",
+      "terms_url": "https://esa-worldcover.org/en/data-access",
+      "notes": "10 m land cover; tree share per 30 m cell used as canopy cover (backend/ates/prepare_inputs.py).",
+      "checked": "2026-11-15"
+    },
+    {
+      "id": "autoates",
+      "name": "autoATES v3.0",
+      "used_for": {
+        "mk": "Нацрт-класи на лавински терен (ATES), непроверени",
+        "en": "Draft avalanche terrain classes (ATES), not validated"
+      },
+      "licence": "MIT",
+      "credit": "Sykes, Knies, Haegeli, Anthony-Malone & Statham (2026), AutoATES v3.0, ISSW Whistler",
+      "url": "https://github.com/AutoATES/autoATES-v3.0-issw",
+      "terms_url": "https://github.com/AutoATES/autoATES-v3.0-issw/blob/main/LICENSE",
+      "notes": "Runs outside this repository with AvaFrame com4FlowPy (EUPL-1.2); see backend/ates/README.md.",
+      "checked": "2026-11-15"
     }
   ]
 }

@@ -220,6 +220,23 @@
     }
     addOutdoorLayers(m);
     addOutsideMask(m);
+    if (ui.draftAtes) addDraftAtes(m, abs, firstLabel);
+  }
+
+  /** Draft terrain classes (AutoATES), only with ?draft=ates. Images from backend/ates/export_maps.py. */
+  let atesIds: string[] = $state([]);
+  async function addDraftAtes(m: MlMap, abs: string, beforeId: string | undefined) {
+    const index = await fetch(`${abs}ates/index.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    if (!index || !map) return;
+    const ids: string[] = [];
+    for (const a of index.areas as { id: string; image: string; bounds: [number, number, number, number] }[]) {
+      const [w, s, e, n] = a.bounds;
+      const id = `ates-${a.id}`;
+      m.addSource(id, { type: 'image', url: `${abs}${a.image}`, coordinates: [[w, n], [e, n], [e, s], [w, s]] });
+      m.addLayer({ id, type: 'raster', source: id, paint: { 'raster-opacity': 0.85, 'raster-resampling': 'nearest', 'raster-fade-duration': 0 } }, beforeId);
+      ids.push(id);
+    }
+    atesIds = ids;
   }
 
   // Base-map detail that doesn't help in the mountains: hidden, so less is drawn and the terrain reads clearly.
@@ -417,6 +434,7 @@
       map.setLayoutProperty(`relief-${scope}`, 'visibility', ui.relief ? 'visible' : 'none');
       map.setLayoutProperty(`contours-${scope}`, 'visibility', ui.contours ? 'visible' : 'none');
     }
+    for (const id of atesIds) map.setLayoutProperty(id, 'visibility', ui.layer === 'ates' ? 'visible' : 'none');
   });
 </script>
 

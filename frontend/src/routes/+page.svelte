@@ -23,6 +23,7 @@
     const params = new URLSearchParams(location.search);
     initLang(params);
     initContrast();
+    ui.draftAtes = params.get('draft') === 'ates';
     loadFollowed();
     try {
       loadData('sources', 'sources.json').then((d) => (data.sources = d?.sources ?? []));

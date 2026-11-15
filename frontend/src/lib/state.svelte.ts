@@ -16,7 +16,8 @@ function savedLang(): Lang {
 export const ui = $state({
   lang: 'mk' as Lang,
   tab: 'weather' as 'weather' | 'terrain',
-  layer: 'slope' as 'slope' | 'aspect',
+  layer: 'slope' as 'slope' | 'aspect' | 'ates',
+  draftAtes: false, // ?draft=ates: draft terrain classes for review with guides, not public
   relief: true,
   contours: true,
   inspect: null as { lat: number; lon: number } | null, // tapped map point (point inspector)

@@ -4,15 +4,25 @@
 
   const s = $derived(t());
   const m = $derived(data.meta);
+  // AutoATES v3.0 palette (as in backend/ates/export_maps.py).
+  const ATES = [['simple', '144,239,152'], ['challenging', '0,173,255'], ['complex', '241,83,147'], ['extreme', '180,0,255']] as const;
 </script>
 
 {#if m}
   <div class="seg" role="group">
     <button aria-pressed={ui.layer === 'slope'} onclick={() => (ui.layer = 'slope')}>{s.slope}</button>
     <button aria-pressed={ui.layer === 'aspect'} onclick={() => (ui.layer = 'aspect')}>{s.aspect}</button>
+    {#if ui.draftAtes}<button aria-pressed={ui.layer === 'ates'} onclick={() => (ui.layer = 'ates')}>{s.ates}</button>{/if}
   </div>
 
-  {#if ui.layer === 'slope'}
+  {#if ui.layer === 'ates'}
+    <p class="draft">{s.ates_note}</p>
+    <div class="ates" role="list">
+      {#each ATES as [key, rgb] (key)}
+        <span role="listitem"><i style="background: rgb({rgb})"></i>{s.ates_classes[key]}</span>
+      {/each}
+    </div>
+  {:else if ui.layer === 'slope'}
     <!-- Labels sit under the colours, in ink: no text colour reaches 7:1 on the red and purple bands. -->
     <div class="scale" role="list">
       {#each m.slope_legend as c (c.label)}
@@ -52,6 +62,10 @@
   .compass { display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; font-size: 12px; font-weight: 650; color: var(--ink); }
   .compass span { display: grid; gap: 4px; text-align: center; }
   .compass i { height: 14px; border-radius: 4px; }
+  .draft { margin: 0 0 10px; padding: 8px 10px; border-radius: 8px; background: var(--serious-bg); color: var(--serious); font-size: 13px; font-weight: 600; }
+  .ates { display: grid; gap: 6px; font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+  .ates span { display: flex; align-items: center; gap: 8px; }
+  .ates i { width: 22px; height: 14px; border-radius: 3px; box-shadow: 0 0 0 1px #17283a33; }
   .hint { font-size: 13px; color: var(--muted); margin: 8px 0 10px; }
   .toggle { display: flex; align-items: center; gap: 8px; font-size: 14px; padding: 6px 0 10px; cursor: pointer; }
   .kv { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; }

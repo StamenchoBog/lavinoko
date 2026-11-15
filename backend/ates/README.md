@@ -24,6 +24,34 @@ guides, not published.
      with `python setup.py build_ext --inplace` for Flow-Py
    - Defaults are left unchanged (`autoATESCfg.ini`); only the three input paths are set per place.
 
+   One-time setup, then the run:
+   ```sh
+   A=backend/.cache/autoates
+   micromamba create -p $A/env -f backend/ates/autoates-environment.yml   # ISSW workshop env without notebooks
+   git clone https://github.com/AutoATES/autoATES-v3.0-issw.git $A/src/autoATES-v3.0-issw   # commit 5558c16
+   git clone https://github.com/OpenNHM/AvaFrame.git $A/src/AvaFrame && git -C $A/src/AvaFrame checkout c745a2dec4a7
+   (cd $A/src/AvaFrame && ../../env/bin/python setup.py build_ext --inplace)
+   backend/ates/run_autoates.sh                                # ~1 min per place; log in .cache/ates/<place>/
+   ```
+
+3. **Maps** (project environment):
+   ```sh
+   cd backend && uv run python ates/export_maps.py
+   ```
+   - `backend/.cache/ates/maps/<place>-draft-ates.pdf` (and `.png`): A4 landscape, 300 dpi, Macedonian and English,
+     with a "НАЦРТ · DRAFT, not validated" banner and a two-language legend, for printing and marking up with guides.
+   - `frontend/static/data/ates/`: overlay for the site, shown **only** with `?draft=ates` (Terrain tab → "ATES
+     (draft)", with the draft warning). Normal visitors never see it (tested in `frontend/tests/e2e/draft.spec.ts`).
+
+## First result (2026-11-15), for discussion
+
+- Kožuf: simple 54 %, challenging 21 %, complex 7 % of the detail area; complex terrain on the steep faces south
+  and east of the summit; the open bowl around the lifts mostly challenging.
+- Popova Šapka: simple 37 %, challenging 39 %, complex 18 %, extreme 1 %; complex rises from 4 % at 1,200 m to
+  57 % above 2,600 m (the Šar ridges west of the resort).
+- Dense forest (over 80 % tree cover) comes out 72–86 % simple. Ask guides specifically about steep open gullies
+  inside the forest: 30 m data and the forest map are weakest there.
+
 ## Settings kept at the authors' defaults, and why
 
 - Ruggedness off: uncalibrated on ~30 m data.

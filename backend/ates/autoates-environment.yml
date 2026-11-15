@@ -1,0 +1,27 @@
+# AutoATES v3.0 + AvaFrame com4FlowPy, from the ISSW 2026 workshop environment without the notebook tools.
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - scipy
+  - rasterio
+  - geopandas
+  - gdal
+  - numba
+  - matplotlib
+  - pyyaml
+  - tqdm
+  - psutil
+  - pandas
+  - shapely
+  - scikit-image
+  - cmcrameri
+  - contextily
+  - cython
+  - deepdiff
+  - deepmerge
+  - pyshp
+  - seaborn
+  - tabulate
+  - setuptools

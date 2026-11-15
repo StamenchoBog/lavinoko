@@ -41,6 +41,7 @@ uv run python weather/fetch_weather.py
 cd ../frontend
 npm install
 npm run dev                              # http://localhost:5173/?lang=en
+                                         # draft terrain classes: ?place=kozuf&tab=terrain&draft=ates (see backend/ates/)
 ```
 
 No Python? Run `npm run test:data` in `frontend/` instead of step 1. It copies a small sample, but the map shows no
