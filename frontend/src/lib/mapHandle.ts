@@ -25,6 +25,10 @@ export interface SnapshotRequest {
   /** Output size in CSS pixels; rendered at this size on every device. */
   width: number;
   height: number;
+  /** Centre of the map, [lon, lat]. */
+  center: [number, number];
+  /** Ground distance across the picture width: fixes the scale (see printScale.ts). */
+  groundWidthM: number;
   points: [number, number][];
 }
 

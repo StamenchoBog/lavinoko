@@ -42,7 +42,7 @@
   const panels = $derived.by(() => {
     let y = 0;
     const p = (hgt: number) => ({ top: (y += T), h: hgt, end: (y += hgt + 2.2) });
-    return { snow: p(15), rain: hasRain ? p(9) : null, temp: p(22), wind: p(15) };
+    return { snow: p(12), rain: hasRain ? p(9) : null, temp: p(16), wind: p(12) };
   });
   const height = $derived(panels.wind.end + 6);
   const bw = $derived(Math.max(0.4, (plotW / n) * 3 - 0.35));

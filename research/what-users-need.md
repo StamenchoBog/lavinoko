@@ -30,7 +30,7 @@ offline — and what LavinOko does about it.
 | Morning check (patrol) | Place summary shows **last 24 h**: new snow, peak ridge wind, minimum temperature. |
 | Simple, retained | Summary first (level → concern → slopes/elevation → why), at most three items, every symbol with a word. |
 | My places | **Follow** places: they come first in the list; their hourly data is kept for offline use. |
-| Print / carry | Print button next to the place name. **Tour sheet on 1 page** (default) or **sheet + detailed forecast on 2 pages**. The sheet: slope-angle map of exactly the view on screen, with scale bar, north arrow and legend; conditions, elevations and the next days; emergency numbers (112 — also for mountain rescue, answered by the Crisis Management Center ЦУК; police 192, fire 193, ambulance 194), coordinates of forecast points for rescuers, blank plan fields (route, group, turnaround time, who knows the plan), gear reminder; one line of required credits. |
+| Print / carry | Print button next to the place name prints a **two-page conditions sheet** (decided 2026-11-15: the platform is avalanche detection and prediction, not trip planning, so plan fields and the gear list were removed). Page 1: slope-angle map at a fixed **1:25,000**, centred on the forecast points, with grid, scale bar, north arrow and legend; conditions, elevations and the next days; a 112 line. Page 2: hour-by-hour chart, days × elevations, a **field observation box** (when, where, elevation, aspect, alarm signs to tick, what was seen), emergency details (112 — also for mountain rescue, answered by the Crisis Management Center ЦУК; police 192, fire 193, ambulance 194; coordinates of forecast points). One line of required credits. |
 | Offline | Installable app; app, last forecast, terrain layers and viewed map areas work without signal. Clear notice when offline; **warning when the forecast is older than 24 h**. |
 
 ## Next (needs hosting or partners)
@@ -38,7 +38,7 @@ offline — and what LavinOko does about it.
 - **Alert delivery** (e-mail, push, SMS) for followed places — only on a level change, not on every update.
 - **Resort morning briefing**: a one-page/short message per resort at 06:00 with overnight snow and wind, for patrol.
 - **Station data** to verify the models, then alert on measured values.
-- Route drawing and GPX on the tour sheet.
+- Route drawing, GPX and trip-plan fields on the printout.
 
 ## Sources
 

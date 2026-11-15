@@ -69,13 +69,14 @@
         <span><i style="background: rgba({c.rgba.slice(0, 3).join(',')}, {Math.min(1, c.rgba[3] / 200)})"></i>{c.label}</span>
       {/each}
     </span>
-    <span class="muted">{s.map_grid}</span>
+    <span class="muted"><b>{s.map_scale}</b> · {s.map_grid}</span>
   </figcaption>
 </figure>
 
 <style>
   figure { margin: 0; }
-  .frame { position: relative; width: 190mm; height: 86mm; border: 0.3mm solid #17283a; overflow: hidden; background: #f3f5f7; }
+  /* Same size as MAP_MM in printing.ts: the picture is drawn for exactly this frame (1:25,000). */
+  .frame { position: relative; width: 190mm; height: 155mm; border: 0.3mm solid #17283a; overflow: hidden; background: #f3f5f7; }
   img, svg { position: absolute; inset: 0; width: 100%; height: 100%; }
   img { object-fit: fill; }
   .grid { stroke: #17283a; stroke-opacity: 0.35; stroke-width: 1.2; }

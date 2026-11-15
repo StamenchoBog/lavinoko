@@ -4,6 +4,7 @@
   import { base } from '#lib/paths.ts';
   import type { FilterSpecification, Map as MlMap, Marker, StyleSpecification } from 'maplibre-gl';
   import { mapHandle, type GridLine, type MapPicture, type SnapshotRequest } from '#lib/mapHandle.ts';
+  import { withTimeout, zoomForGroundWidth } from '#lib/printScale.ts';
   import { data, currentPlace, selectPlace, t, ui } from '#lib/state.svelte.ts';
 
   let { dataBase }: { dataBase: string } = $props();
@@ -82,8 +83,6 @@
     };
   });
 
-  const MIN_PRINT_WIDTH_M = 8000;
-
   /**
    * Our own base map (backend/basemap/build_basemap.py) when it has been built; otherwise the public
    * OpenFreeMap style, which uses the same data schema, so all our layers work with either.
@@ -108,44 +107,16 @@
   }
 
   /**
-   * Print picture of the slope map, framed on what the user is looking at (the part not covered by
-   * the panel). It is rendered off-screen at a fixed size, so the print is sharp on any device, and
-   * the grid lines and points are measured while the map is at that exact view.
+   * Print picture of the slope map at a fixed scale, centred on `req.center`. It is rendered
+   * off-screen at a fixed size, so the print is sharp on any device, and the grid lines and points
+   * are measured while the map is at that exact view. Points outside the frame come back as null.
    */
   async function snapshot(req: SnapshotRequest): Promise<MapPicture | null> {
     const m = map;
     if (!m) return null;
-    const pad = m.getPadding();
-    const before = { center: m.getCenter(), zoom: m.getZoom(), padding: pad };
-    const canvas = m.getCanvas();
-    const visibleWidth = Math.max(200, canvas.clientWidth - (pad.left ?? 0) - (pad.right ?? 0));
-    const visibleHeight = Math.max(200, canvas.clientHeight - (pad.top ?? 0) - (pad.bottom ?? 0));
-    // Centre of the part of the map the user can see (beside / above the panel).
-    let center: { lng: number; lat: number } = m.unproject([(pad.left ?? 0) + visibleWidth / 2, (pad.top ?? 0) + visibleHeight / 2]);
-    // Same ground width as on screen, but at least MIN_PRINT_WIDTH_M: a tour needs its surroundings,
-    // and the 10 m terrain cells would print as visible blocks when zoomed in further.
-    const cosLat = Math.cos((center.lat * Math.PI) / 180);
-    const maxZoom = Math.log2((40075016.686 * cosLat * req.width) / (512 * MIN_PRINT_WIDTH_M));
-    let zoom = Math.min(maxZoom, before.zoom + Math.log2(req.width / visibleWidth));
-
-    // The printed map must show every forecast point (the emergency box lists their coordinates):
-    // if one falls outside, frame the view centre and all points together.
-    const mercY = (lat: number) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
-    const lonsAll = [center.lng, ...req.points.map((p) => p[0])];
-    const latsAll = [center.lat, ...req.points.map((p) => p[1])];
-    const fits = (z: number, c: { lng: number; lat: number }) => {
-      const world = 512 * 2 ** z;
-      return req.points.every(([lon, lat]) => {
-        const x = ((lon - c.lng) / 360) * world / req.width + 0.5;
-        const y = ((mercY(c.lat) - mercY(lat)) / (2 * Math.PI)) * world / req.height + 0.5;
-        return x > 0.06 && x < 0.94 && y > 0.08 && y < 0.92;
-      });
-    };
-    if (!fits(zoom, center)) {
-      const w = Math.min(...lonsAll), e = Math.max(...lonsAll), s = Math.min(...latsAll), n = Math.max(...latsAll);
-      center = { lng: (w + e) / 2, lat: (s + n) / 2 };
-      while (zoom > 8 && !fits(zoom, center)) zoom -= 0.1;
-    }
+    const before = { center: m.getCenter(), zoom: m.getZoom(), bearing: m.getBearing(), pitch: m.getPitch(), padding: m.getPadding() };
+    const center = { lng: req.center[0], lat: req.center[1] };
+    const zoom = zoomForGroundWidth(center.lat, req.width, req.groundWidthM);
     const markers = [...container.querySelectorAll<HTMLElement>('.maplibregl-marker')];
     const layerVis = (['slope', 'aspect'] as const).map((l) => [l, m.getLayoutProperty(`${l}-country`, 'visibility')] as const);
     const style = container.getAttribute('style') ?? '';
@@ -159,8 +130,10 @@
       container.style.cssText = `position:fixed;left:0;top:0;width:${req.width}px;height:${req.height}px;`;
       m.resize();
       m.setPadding({ top: 0, left: 0, right: 0, bottom: 0 });
-      m.jumpTo({ center, zoom });
-      await new Promise<void>((r) => m.once('idle', () => r()));
+      // North up and flat: the grid, points and north arrow are drawn for that view.
+      m.jumpTo({ center, zoom, bearing: 0, pitch: 0 });
+      // A stalled tile must not block printing: after 10 s, capture what has loaded.
+      await withTimeout(new Promise<void>((r) => m.once('idle', () => r())), 10000, undefined);
       // The drawing buffer is only readable during a render, so capture inside the render event.
       const url = await new Promise<string>((resolve) => {
         m.once('render', () => resolve(m.getCanvas().toDataURL('image/jpeg', 0.9)));
@@ -189,7 +162,7 @@
         const x = fx(lon), y = fy(lat);
         return x >= 0 && x <= 1 && y >= 0 && y <= 1 ? { x, y } : null;
       });
-      const widthMeters = ((40075016.686 * cosLat) / world) * req.width;
+      const widthMeters = req.groundWidthM;
       return { url, width: req.width, height: req.height, widthMeters, step, lons, lats, points };
     } finally {
       container.setAttribute('style', style);
@@ -197,7 +170,7 @@
       for (const [l, v] of layerVis) for (const scope of ['country', 'detail']) m.setLayoutProperty(`${l}-${scope}`, 'visibility', v ?? 'visible');
       markers.forEach((el) => (el.style.visibility = ''));
       m.setPadding(before.padding);
-      m.jumpTo({ center: before.center, zoom: before.zoom });
+      m.jumpTo({ center: before.center, zoom: before.zoom, bearing: before.bearing, pitch: before.pitch });
     }
   }
 

@@ -23,7 +23,7 @@ credits "Project LavinOko".
 - **Per place:** weather-driven avalanche problems, forecast by elevation with freezing level, hour-by-hour chart.
 - **Any point on the map:** elevation, slope, aspect and a live 12-hour weather window.
 - **Alerts** only when 2 of 3 weather models (ICON-EU, GFS, Météo-France) agree.
-- **Terrain** layers from the Copernicus DEM. Also **print** a one-page tour sheet and use it **offline**.
+- **Terrain** layers from the Copernicus DEM. Also **print** a two-page conditions sheet (1:25,000 slope map, conditions, field observation box) and use it **offline**.
 
 Interface in Macedonian and English (`?lang=en`).
 

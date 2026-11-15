@@ -1,6 +1,8 @@
 <script lang="ts">
-  // The printed document for a place. Exactly one A4 page (tour sheet) or two (plus detailed
-  // forecast); every page is a fixed 210 × 297 mm box, so content never spills onto extra pages.
+  // The printed conditions sheet for a place: page 1 the 1:25,000 map and conditions, page 2 the
+  // detail, a field observation box and emergency information. It carries what the system knows
+  // into the field; it is not a trip planner. Every page is a fixed 210 × 297 mm box, so content
+  // never spills onto extra pages.
   import { onMount } from 'svelte';
   import { asset } from '$app/paths';
   import { base } from '#lib/paths.ts';
@@ -17,7 +19,8 @@
   const place = $derived(currentPlace());
   const points = $derived(place ? byHeight(place.points) : []);
   const top = $derived(points[0]);
-  const pages = $derived(print.mode === 'full' ? 2 : 1);
+  const pages = 2;
+  const COMPASS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'] as const;
 
   const concerns = $derived.by(() => {
     // eslint-disable-next-line svelte/prefer-svelte-reactivity -- built and read inside this $derived, never kept
@@ -150,6 +153,8 @@
               {/each}
             </tbody>
           </table>
+        </div>
+        <div>
           <h2>{fill(s.next_days, { elev: top.elevation })}</h2>
           <div class="days">
             {#each days as d (d.date)}
@@ -163,41 +168,13 @@
             {/each}
           </div>
         </div>
-
-        <div class="emergency">
-          <h2>{s.sheet_emergency}</h2>
-          <p class="n112">112</p>
-          <p class="em">{s.sheet_112}</p>
-          <p class="say"><b>{s.call_say}</b> {s.call_items.join(' · ')}</p>
-          <p class="burial">{s.burial}</p>
-          <h3>{s.map_points}</h3>
-          <ol>
-            {#each points as p (p.id)}
-              <li>{p.elevation} m — {coord(p.lat, p.lon)}</li>
-            {/each}
-          </ol>
-          <p class="other">{s.sheet_other}</p>
-        </div>
       </div>
 
-      <div class="plan">
-        <h2>{s.sheet_plan}</h2>
-        <div class="fields">
-          <div class="f1">{s.plan_date}</div>
-          <div class="f1">{s.plan_start}</div>
-          <div class="f1">{s.sheet_turnaround}</div>
-          <div class="f1">{s.plan_back}</div>
-          <div class="f4">{s.sheet_group}</div>
-          <div class="f4">{s.plan_route}</div>
-          <div class="f4">{s.sheet_contact}</div>
-        </div>
-        <p class="gear"><b>{s.gear_title}</b>{#each s.gear_items as g (g)}<span><i></i>{g}</span>{/each}</p>
-      </div>
+      <p class="emline"><b>112:</b> {s.emergency_line}</p>
 
       {@render footer()}
     </section>
 
-    {#if print.mode === 'full'}
       <section class="page">
         {@render header(2, s.doc_forecast, true)}
 
@@ -228,14 +205,33 @@
         </table>
 
         <div class="cols2">
-          <div>
-            <h2>{s.signs_title}</h2>
-            <ul class="checks">{#each s.signs_items as it (it)}<li><i></i>{it}</li>{/each}</ul>
+          <div class="obs">
+            <h2>{s.obs_title}</h2>
+            <div class="fields">
+              <div>{s.obs_when}</div>
+              <div>{s.obs_where}</div>
+              <div>{s.obs_elev}</div>
+              <div class="aspect">{s.obs_aspect}<span>{#each COMPASS as c (c)}<b>{c}</b>{/each}</span></div>
+            </div>
+            <h3>{s.signs_title}</h3>
+            <ul class="checks">{#each s.signs_items as it (it)}<li class="tick"><i></i>{it}</li>{/each}</ul>
             <p class="note">{s.signs_note}</p>
+            <h3>{s.obs_seen}</h3>
+            <div class="lines">{#each Array(3) as _, i (i)}<span></span>{/each}</div>
           </div>
-          <div>
-            <h2>{s.notes_title}</h2>
-            <div class="lines">{#each Array(7) as _, i (i)}<span></span>{/each}</div>
+
+          <div class="emergency">
+            <h2>{s.sheet_emergency}: 112</h2>
+            <p class="em">{s.sheet_112}</p>
+            <p class="say"><b>{s.call_say}</b> {s.call_items.join(' · ')}</p>
+            <p class="burial">{s.burial}</p>
+            <h3>{s.map_points}</h3>
+            <ol>
+              {#each points as p (p.id)}
+                <li>{p.elevation} m — {coord(p.lat, p.lon)}</li>
+              {/each}
+            </ol>
+            <p class="other">{s.sheet_other}</p>
           </div>
         </div>
 
@@ -246,7 +242,6 @@
 
         {@render footer()}
       </section>
-    {/if}
   </div>
 {/if}
 
@@ -295,7 +290,7 @@
     .warrow { width: 2.6mm; height: 2.6mm; display: inline-block; vertical-align: -0.4mm; margin-right: 0.6mm; fill: #17283a; }
 
     /* Conditions + emergency */
-    .cols { display: grid; grid-template-columns: 1.05fr 1fr; gap: 5mm; }
+    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
     table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
     th { text-align: right; font-weight: 600; font-size: 7pt; color: #5e6b78; padding: 0 1.2mm 0.6mm; border-bottom: 0.3mm solid #17283a; }
     td { text-align: right; padding: 0.7mm 1.2mm; border-bottom: 0.2mm solid #c9d1da; white-space: nowrap; }
@@ -309,28 +304,30 @@
     .cols h2:not(:first-child) { margin-top: 1.8mm; }
 
     .emergency { border: 0.5mm solid #17283a; border-radius: 1.8mm; padding: 1.8mm 3mm; }
-    .n112 { font-size: 24pt; font-weight: 900; line-height: 1; letter-spacing: 0.02em; }
     .em { font-weight: 700; margin-top: 0.6mm; }
     .say { margin-top: 1mm; font-size: 7.3pt; }
     .burial { margin-top: 1mm; font-size: 7.3pt; padding: 1mm 1.8mm; background: #fbe9e7; border-radius: 1mm; }
     ol { margin: 0; padding-left: 4.5mm; font-size: 7.5pt; font-variant-numeric: tabular-nums; }
     .other { margin-top: 0.8mm; font-size: 7pt; color: #5e6b78; }
 
-    /* Plan */
-    .fields { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5mm; }
-    .fields > div { display: block; border: 0.25mm solid #9aa6b2; border-radius: 1mm; padding: 0.6mm 1.5mm; font-size: 6.8pt; color: #5e6b78; height: 7.5mm; }
-    .fields .f4 { grid-column: span 4; height: 7mm; }
-    .gear { display: flex; flex-wrap: wrap; align-items: center; gap: 1mm 4mm; margin-top: 1.4mm; font-size: 7.5pt; }
-    .gear span, .checks li { display: inline-flex; align-items: center; gap: 1.2mm; }
-    .gear i, .checks i { width: 3mm; height: 3mm; border: 0.3mm solid #17283a; border-radius: 0.5mm; display: inline-block; flex: none; }
+    .emline { font-size: 8pt; padding: 1.2mm 2.5mm; border: 0.4mm solid #17283a; border-radius: 1.5mm; }
+    .emline b { font-size: 11pt; font-weight: 900; margin-right: 1.5mm; }
+
+    /* Field observation */
+    .obs { border: 0.3mm solid #9aa6b2; border-radius: 1.8mm; padding: 1.8mm 3mm; }
+    .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5mm; }
+    .fields > div { border: 0.25mm solid #9aa6b2; border-radius: 1mm; padding: 0.6mm 1.5mm; font-size: 6.8pt; color: #5e6b78; height: 8mm; box-sizing: border-box; }
+    .fields .aspect span { display: flex; justify-content: space-between; margin-top: 0.8mm; color: #17283a; font-size: 7pt; }
+    .checks li { display: flex; align-items: center; gap: 1.2mm; }
+    .checks i { width: 3mm; height: 3mm; border: 0.3mm solid #17283a; border-radius: 0.5mm; display: inline-block; flex: none; }
 
     /* Page 2 */
     .matrix th.grp, .matrix td.grp { border-left: 0.3mm solid #c9d1da; }
     .matrix thead tr:first-child th { text-align: center; color: #17283a; font-size: 8pt; border-bottom: 0; }
-    .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
-    .checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.6mm; font-size: 8pt; }
+    .cols2 { display: grid; grid-template-columns: 1.15fr 1fr; gap: 5mm; align-items: start; }
+    .checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.2mm; font-size: 7.8pt; }
     .note { margin-top: 1.8mm; font-size: 7.5pt; color: #5e6b78; }
-    .lines { display: grid; gap: 6.5mm; padding-top: 4mm; }
+    .lines { display: grid; gap: 6mm; padding-top: 4mm; }
     .lines span { border-bottom: 0.25mm solid #9aa6b2; }
     .about p { font-size: 7.5pt; color: #5e6b78; }
 

@@ -43,7 +43,6 @@ export const data = new Data();
  *  component itself is loaded with its code on the first print. */
 class Print {
   doc = $state.raw<Component | null>(null);
-  mode = $state<'sheet' | 'full'>('sheet');
   map = $state.raw<MapPicture | null>(null);
   hourly = $state.raw<HourlyPoint[] | null>(null);
 }
