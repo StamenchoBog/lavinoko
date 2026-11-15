@@ -83,7 +83,7 @@ Remove the entry once the version is older than 7 days.
   Owners", "Dismiss stale approvals when new commits are pushed" and "Require conversation resolution". Keep the
   admin bypass for emergencies only.
 - **Safety wording** (`frontend/src/lib/i18n.ts`, place view) and alert thresholds (`backend/weather/`) get a
-  forecaster as code owner before any danger rating is published (roadmap Phase 2).
+  forecaster as code owner before any danger rating is published (a shadow season, winter 2028/29 at the earliest).
 - **Deployment**: when the site is hosted, deploy from a GitHub Actions *environment* ("production") with required
   reviewers, its own secrets, and deployment only from `main`.
 - **Signed commits**: "Require signed commits" in the ruleset once every contributor signs.

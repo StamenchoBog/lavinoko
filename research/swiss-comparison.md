@@ -46,7 +46,7 @@ Checked 2026-11-14. What the Swiss do well, what research says goes wrong, and w
 - Measured values from stations; snow maps.
 - Observation reports on a map, shown publicly at once; for avalanches the release point (via a reused tool first, see `docs/architecture/`).
 - Machine-readable bulletin feed in the European standard format (CAAML) for other apps.
-- Region merging and real danger levels once trained forecasters issue them (Phase 2 of the roadmap).
+- Region merging and real danger levels once trained forecasters issue them (after a shadow season, winter 2028/29 at the earliest).
 
 ## Sources
 
