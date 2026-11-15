@@ -29,7 +29,7 @@ Interface in Macedonian and English (`?lang=en`).
 
 ## Run locally
 
-Requires [uv](https://docs.astral.sh/uv/) and Node 22+.
+Requires [uv](https://docs.astral.sh/uv/), Node 22+ and [pnpm](https://pnpm.io) 11 (`corepack enable` gives the pinned version).
 
 ```sh
 # 1. Generate the data (written to frontend/static/data/)
@@ -39,12 +39,12 @@ uv run python weather/fetch_weather.py
 
 # 2. Start the site
 cd ../frontend
-npm install
-npm run dev                              # http://localhost:5173/?lang=en
+pnpm install
+pnpm dev                                 # http://localhost:5173/?lang=en
                                          # draft terrain classes: ?place=kozuf&tab=terrain&draft=ates (see backend/ates/)
 ```
 
-No Python? Run `npm run test:data` in `frontend/` instead of step 1. It copies a small sample, but the map shows no
+No Python? Run `pnpm test:data` in `frontend/` instead of step 1. It copies a small sample, but the map shows no
 terrain or base map.
 
 <details>
@@ -57,10 +57,10 @@ uv run python -m contract.generate                      # after editing contract
 uv run --with osmium python basemap/build_basemap.py    # optional own base map (Java 21+, ~1.5 GB once)
 
 # frontend/
-npm run lint && npm run check      # ESLint, svelte-check
-npm run build && npm run size      # first load must stay under 100 KB gzipped
-npm run build && npm run preview   # production build with offline support
-npm test                           # Playwright; needs static/data/
+pnpm lint && pnpm check           # ESLint, svelte-check
+pnpm build && pnpm size           # first load must stay under 100 KB gzipped
+pnpm build && pnpm preview        # production build with offline support
+pnpm test                         # Playwright; needs static/data/
 ```
 
 CI (`.github/workflows/ci.yml`) runs these on every push and pull request.

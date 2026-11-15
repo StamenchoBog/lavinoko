@@ -21,6 +21,7 @@ updates:
     commit-message:
       prefix: "ci"
 
+  # "npm" covers pnpm too: Dependabot reads frontend/pnpm-lock.yaml and keeps it updated.
   - package-ecosystem: npm
     directory: /frontend
     schedule:

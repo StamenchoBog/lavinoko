@@ -1,7 +1,7 @@
 // Fails when the first page load is over budget: the HTML plus every script and stylesheet the
 // browser must fetch before the page runs, measured gzipped (as GitHub Pages serves them).
 // Code loaded later with import() (the map library, PMTiles) and the data files do not count.
-// Run after `npm run build`.
+// Run after `pnpm run build`.
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { gzipSync } from 'node:zlib';
@@ -10,7 +10,7 @@ const BUDGET = 100 * 1024;
 const root = resolve(process.argv[2] ?? 'build');
 const indexFile = join(root, 'index.html');
 if (!existsSync(indexFile)) {
-  console.error(`${relative('.', indexFile)} not found: run \`npm run build\` first.`);
+  console.error(`${relative('.', indexFile)} not found: run \`pnpm run build\` first.`);
   process.exit(1);
 }
 

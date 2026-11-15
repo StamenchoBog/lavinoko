@@ -1,0 +1,9 @@
+# pnpm settings for the frontend (a single package; no workspace members).
+
+# A new release must be public this long before it can be installed (minutes; 10080 = 7 days),
+# matching Dependabot's cooldown. Most hijacked packages are found and pulled within that window.
+minimumReleaseAge: 10080
+
+# Packages may run install scripts only when listed here (true = allowed, false = reviewed and refused).
+# Any other package with a build script fails the install until it has been reviewed.
+allowBuilds: {}
