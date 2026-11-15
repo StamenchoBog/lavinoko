@@ -1,8 +1,8 @@
 <script lang="ts">
   // Arrow pointing where the wind blows to; a light circle when the wind has no steady direction,
   // so numbers always line up.
-  import { COMPASS_DEG } from '$lib/format';
-  import type { Compass } from '$lib/types';
+  import { COMPASS_DEG } from '#lib/format.ts';
+  import type { Compass } from '#lib/types.ts';
 
   let { from, size = 13 }: { from: Compass | null | undefined; size?: number } = $props();
 </script>

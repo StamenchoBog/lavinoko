@@ -1,10 +1,10 @@
 <script lang="ts">
   // The map. MapLibre is loaded only after the panel is on screen, so the forecast shows first.
   import { onMount } from 'svelte';
-  import { base } from '$app/paths';
+  import { base } from '#lib/paths.ts';
   import type { FilterSpecification, Map as MlMap, Marker, StyleSpecification } from 'maplibre-gl';
-  import { mapHandle, type GridLine, type MapPicture, type SnapshotRequest } from '$lib/mapHandle';
-  import { data, currentPlace, selectPlace, t, ui } from '$lib/state.svelte';
+  import { mapHandle, type GridLine, type MapPicture, type SnapshotRequest } from '#lib/mapHandle.ts';
+  import { data, currentPlace, selectPlace, t, ui } from '#lib/state.svelte.ts';
 
   let { dataBase }: { dataBase: string } = $props();
 

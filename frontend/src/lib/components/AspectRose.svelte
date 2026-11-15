@@ -1,7 +1,7 @@
 <script lang="ts">
   // Which slope aspects are affected, as an eight-sector compass (as in Alpine bulletins),
   // always with the elevation written next to it.
-  import type { Compass } from '$lib/types';
+  import type { Compass } from '#lib/types.ts';
 
   let { aspects, label }: { aspects: Compass[]; label: string } = $props();
   const ORDER: Compass[] = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];

@@ -2,13 +2,13 @@
   // "Situation": the weather concerns of a place, expressed as the avalanche problem they typically
   // create (after SLF "Caution Avalanches!", 2026): what, how long it lasts, where, what to look for.
   // Weather-based only: not a danger rating, and old weak layers can't be judged from weather.
-  import { byHeight, num } from '$lib/format';
-  import { fill, type Problem } from '$lib/i18n';
-  import { currentPlace, t } from '$lib/state.svelte';
-  import type { Compass, Flag, FlagCode } from '$lib/types';
+  import { byHeight, num } from '#lib/format.ts';
+  import { fill, type Problem } from '#lib/i18n.ts';
+  import { currentPlace, t } from '#lib/state.svelte.ts';
+  import type { Compass, Flag, FlagCode } from '#lib/types.ts';
   import AspectRose from '../AspectRose.svelte';
   import LevelBadge from '../LevelBadge.svelte';
-  import { flagKey, flagText } from '$lib/flags';
+  import { flagKey, flagText } from '#lib/flags.ts';
 
   const PROBLEM: Record<FlagCode, Problem> = {
     heavy_snow_coming: 'new_snow', recent_heavy_snow: 'new_snow',

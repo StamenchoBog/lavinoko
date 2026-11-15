@@ -1,5 +1,5 @@
 // Loading the data files, checked against the contract generated from the backend models.
-import { base } from '$app/paths';
+import { base } from '#lib/paths.ts';
 import { dataProblem, type DataName } from './contract/check';
 import type { Roots } from './contract/types.gen';
 import { DATA_CACHE } from './swcache';

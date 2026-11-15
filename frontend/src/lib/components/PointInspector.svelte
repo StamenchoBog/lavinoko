@@ -1,9 +1,9 @@
 <script lang="ts">
   // Card for a tapped point: coordinates to read out to 112, terrain at the spot, live weather window.
-  import { num } from '$lib/format';
-  import { fill } from '$lib/i18n';
-  import { compassOf, terrainAt, toDms, weatherAt, type HourRow, type Terrain } from '$lib/inspect';
-  import { data, t, ui } from '$lib/state.svelte';
+  import { num } from '#lib/format.ts';
+  import { fill } from '#lib/i18n.ts';
+  import { compassOf, terrainAt, toDms, weatherAt, type HourRow, type Terrain } from '#lib/inspect.ts';
+  import { data, t, ui } from '#lib/state.svelte.ts';
 
   const s = $derived(t());
   const pt = $derived(ui.inspect);

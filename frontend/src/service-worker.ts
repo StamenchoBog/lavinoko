@@ -6,10 +6,15 @@
 // and a data file that fails the contract check never replaces the last good copy;
 // terrain and base-map tiles kept only as the user views them (no bulk downloading of base-map
 // tiles, per OpenFreeMap's terms).
-import { base, build, files, prerendered, version } from '$service-worker';
-import { DATA_CACHE, responseProblem, staleAppCaches } from '$lib/swcache';
+import { version } from '$app/env';
+import { assets, immutable, prerendered } from '$app/manifest';
+import { DATA_CACHE, responseProblem, staleAppCaches } from '#lib/swcache.ts';
 
 const sw = self as unknown as ServiceWorkerGlobalScope;
+/** The site's base path ('' locally, '/<repo>' on GitHub Pages): the worker is registered at the site root. */
+const base = new URL(sw.registration.scope).pathname.replace(/\/$/, '');
+/** The manifest lists paths relative to the base path. */
+const at = (path: string) => `${base}/${path.replace(/^\//, '')}`;
 const APP = `app-${version}`;
 const DATA = DATA_CACHE;
 const TILES = 'tiles-v1';
@@ -18,8 +23,19 @@ const MAX_TILES = 4000;
 const NETWORK_WAIT_MS = 2500;
 
 // App shell: built code, small static files and the prerendered page. Large/generated data is cached at runtime.
-const SHELL = [...build, ...files.filter((f) => !f.includes('/data/')), ...prerendered];
-const INDEX = prerendered.find((p) => p.endsWith('/')) ?? `${base}/`;
+const SHELL = [
+  ...immutable.map((f) => at(f.path)),
+  ...assets.map((f) => at(f.path)).filter((f) => !f.includes('/data/')),
+  ...prerendered.map((f) => at(f.path))
+];
+/** The one page: every navigation (?place=, ?lang=) is served this stored copy. */
+const INDEX = `${base}/`;
+/**
+ * App files are stored without request headers, but the browser asks for module scripts with an
+ * `Origin` header; a server that answers with `Vary: Origin` (Vite 8's preview, some CDNs) would make
+ * every stored copy miss. Their names change with their content, so the headers never matter.
+ */
+const SHELL_MATCH: CacheQueryOptions = { ignoreVary: true };
 // Small data the page needs to start; stored on install so the very first visit already works offline.
 const CORE_DATA = ['weather.json', 'sources.json', 'terrain/metadata.json'].map((f) => `${base}/data/${f}`);
 
@@ -157,9 +173,9 @@ sw.addEventListener('fetch', (event) => {
     } else if (request.mode === 'navigate') {
       // One page for every query (?place=, ?lang=): serve the stored copy at once, even on a weak
       // connection. A new version arrives with the next offline worker, not by refetching the page.
-      event.respondWith(caches.match(INDEX).then((r) => r ?? fetch(request)));
+      event.respondWith(caches.match(INDEX, SHELL_MATCH).then((r) => r ?? fetch(request)));
     } else if (SHELL.includes(url.pathname)) {
-      event.respondWith(caches.match(request).then((r) => r ?? fetch(request)));
+      event.respondWith(caches.match(request, SHELL_MATCH).then((r) => r ?? fetch(request)));
     }
     return;
   }

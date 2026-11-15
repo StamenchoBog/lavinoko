@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { data, t, ui } from '$lib/state.svelte';
+  import { data, t, ui } from '#lib/state.svelte.ts';
 
   const s = $derived(t());
 </script>

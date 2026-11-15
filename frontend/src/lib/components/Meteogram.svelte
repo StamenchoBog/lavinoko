@@ -1,11 +1,11 @@
 <script lang="ts">
   // Hour-by-hour forecast for one point: stacked panels on one shared time axis
   // (new snow, rain, temperature, ridge wind). One scale per panel, never two in one.
-  import { loadData } from '$lib/data';
-  import { dayLabel, num } from '$lib/format';
-  import { fill } from '$lib/i18n';
-  import { t } from '$lib/state.svelte';
-  import type { HourlyPoint } from '$lib/types';
+  import { loadData } from '#lib/data.ts';
+  import { dayLabel, num } from '#lib/format.ts';
+  import { fill } from '#lib/i18n.ts';
+  import { t } from '#lib/state.svelte.ts';
+  import type { HourlyPoint } from '#lib/types.ts';
 
   let { placeId, pointId }: { placeId: string; pointId: string } = $props();
 

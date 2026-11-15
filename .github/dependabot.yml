@@ -30,8 +30,22 @@ updates:
       default-days: 7
       semver-major-days: 14
     open-pull-requests-limit: 5
+    ignore:
+      # TypeScript 7 (the Go rewrite): SvelteKit 3, svelte-check and typescript-eslint all need 6.
+      # Drop this once they accept 7.
+      - dependency-name: typescript
+        versions: [">=7"]
     groups:
-      # Minor and patch updates of dev tooling land as one PR; majors and runtime deps stay separate.
+      # These require matching versions of each other (peer dependencies): a major of one alone can't
+      # install. They always move together, majors included, in a single PR.
+      svelte-vite:
+        patterns:
+          - "@sveltejs/*"
+          - "svelte"
+          - "svelte-check"
+          - "vite"
+          - "typescript"
+      # Minor and patch updates of other dev tooling land as one PR; their majors come one at a time.
       dev-tooling:
         dependency-type: development
         update-types: [minor, patch]

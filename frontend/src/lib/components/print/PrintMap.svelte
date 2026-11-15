@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { MapPicture } from '$lib/mapHandle';
-  import { data, t } from '$lib/state.svelte';
+  import type { MapPicture } from '#lib/mapHandle.ts';
+  import { data, t } from '#lib/state.svelte.ts';
 
   let { pic, labels }: { pic: MapPicture | null; labels: string[] } = $props();
   const s = $derived(t());

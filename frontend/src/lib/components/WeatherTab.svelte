@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { byHeight, dayLabel, num } from '$lib/format';
-  import { fill } from '$lib/i18n';
-  import { currentPlace, t, ui } from '$lib/state.svelte';
+  import { byHeight, dayLabel, num } from '#lib/format.ts';
+  import { fill } from '#lib/i18n.ts';
+  import { currentPlace, t, ui } from '#lib/state.svelte.ts';
   import Ladder from './Ladder.svelte';
   import Meteogram from './Meteogram.svelte';
   import DayStrip from './place/DayStrip.svelte';
