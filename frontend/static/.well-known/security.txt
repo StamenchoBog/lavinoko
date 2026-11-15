@@ -1,0 +1,6 @@
+# Security contact for "Лавински информации / Avalanche information" (Project LavinOko). RFC 9116.
+# Renew "Expires" before it passes (at most a year ahead); see docs/repository-settings.md.
+Contact: https://github.com/StamenchoBog/lavinoko/security/advisories/new
+Expires: 2027-11-15T00:00:00.000Z
+Policy: https://github.com/StamenchoBog/lavinoko/blob/main/SECURITY.md
+Preferred-Languages: mk, sq, en

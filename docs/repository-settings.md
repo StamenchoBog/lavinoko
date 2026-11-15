@@ -58,6 +58,11 @@ there; that would stop the archive.
 - [ ] Commit signing (SSH or GPG key) registered on GitHub, so commits show "Verified".
 - [ ] Notifications: Actions failures on, so missed or failed archive runs reach you by e-mail.
 
+## Yearly: `security.txt`
+
+`frontend/static/.well-known/security.txt` (RFC 9116) must not expire. Before **2027-11-15**, move `Expires` a year
+ahead. When the site gets its domain, add `Canonical: https://<domain>/.well-known/security.txt`.
+
 ## Security fixes that are newer than 7 days
 
 `frontend/pnpm-workspace.yaml` refuses packages published less than 7 days ago. For an urgent fix in a Dependabot
