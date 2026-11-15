@@ -1,6 +1,7 @@
 <script lang="ts">
   // Hour-by-hour forecast for paper: last 24 h + next 72 h, stacked panels on one time axis,
   // one scale per panel. Units are millimetres (viewBox), so it prints at a fixed, crisp size.
+  import { currentHourIndex } from '#lib/format.ts';
   import { t } from '#lib/state.svelte.ts';
   import type { HourlyPoint } from '#lib/types.ts';
 
@@ -8,12 +9,14 @@
   const s = $derived(t());
 
   const W = 190, L = 11, R = 2, plotW = W - L - R;
-  const start = $derived(Math.max(0, h.now_index - 24));
-  const end = $derived(Math.min(h.time.length, h.now_index + 72));
+  // The hour of printing, not of issue (the file's now_index).
+  const nowI = $derived(currentHourIndex(h.time, new Date(), h.now_index));
+  const start = $derived(Math.max(0, nowI - 24));
+  const end = $derived(Math.min(h.time.length, nowI + 72));
   const n = $derived(end - start);
   const sl = <T,>(a: T[]) => a.slice(start, end);
   const x = (i: number) => L + (n > 1 ? (i / (n - 1)) * plotW : 0);
-  const now = $derived(h.now_index - start);
+  const now = $derived(nowI - start);
 
   const sums = (vals: (number | null)[]) => {
     const out: { i: number; v: number }[] = [];

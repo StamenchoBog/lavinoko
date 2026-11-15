@@ -36,8 +36,10 @@ STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
 UA = {"User-Agent": "lavinoko/0.1 (+https://github.com/StamenchoBog/lavinoko)"}
 
 FONTS = ["Noto Sans Regular", "Noto Sans Bold", "Noto Sans Italic"]
-# Unicode blocks of 256 code points: Latin, Greek, Cyrillic, punctuation, arrows/symbols (⌂ ▲).
-GLYPH_RANGES = [0, 256, 768, 1024, 1280, 8192, 8448, 8704, 8960, 9472, 9728]
+# Unicode blocks of 256 code points: Latin and Latin Extended (A, B and Additional: ẞ, ṭ, ẓ in
+# transliterated names), Greek, Cyrillic, punctuation, arrows/symbols (⌂ ▲). A missing block is a
+# 404 in the browser and unlabelled names on the map.
+GLYPH_RANGES = [0, 256, 512, 768, 1024, 1280, 7680, 8192, 8448, 8704, 8960, 9472, 9728]
 
 
 def download(url: str, path: Path) -> Path:

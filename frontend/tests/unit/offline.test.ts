@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { previousIssue, missedIssue } from '../../src/lib/format';
+import { currentHourIndex, missedIssue, previousIssue } from '../../src/lib/format';
 import { staleAppCaches } from '../../src/lib/swcache';
 
 // Skopje is UTC+1 in winter: issues at 08:00 and 17:00 local are 07:00 and 16:00 UTC.
@@ -26,4 +26,19 @@ test('staleAppCaches keeps the current and the newest previous app shell', () =>
   expect(staleAppCaches(keys, 'app-4')).toEqual(['app-1', 'app-2']);
   expect(staleAppCaches(['app-3', 'app-4'], 'app-4')).toEqual([]);
   expect(staleAppCaches(['app-4'], 'app-4')).toEqual([]);
+});
+
+test.describe('currentHourIndex (the "now" line)', () => {
+  const times = ['2026-11-15T10:00', '2026-11-15T11:00', '2026-11-15T12:00', '2026-11-15T13:00'];
+  test('follows the clock in Skopje time, not the issue hour', () => {
+    // 11:30 UTC is 12:30 in Skopje (CET).
+    expect(currentHourIndex(times, new Date('2026-11-15T11:30:00Z'))).toBe(2);
+  });
+  test('stays at the ends outside the series', () => {
+    expect(currentHourIndex(times, new Date('2026-11-14T00:00:00Z'))).toBe(0);
+    expect(currentHourIndex(times, new Date('2026-11-16T00:00:00Z'))).toBe(3);
+  });
+  test('uses the fallback with no times', () => {
+    expect(currentHourIndex([], new Date(), 7)).toBe(7);
+  });
 });

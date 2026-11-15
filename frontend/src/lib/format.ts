@@ -23,6 +23,20 @@ function skopjeParts(d: Date) {
   return Object.fromEntries(f.formatToParts(d).map((x) => [x.type, x.value]));
 }
 
+/**
+ * Index of the current hour in an hourly series of Skopje times ("2026-11-15T16:00"), so the
+ * "now" line moves with the clock instead of staying where it was when the forecast was issued.
+ * Before the series starts or after it ends, the nearest end; `fallback` if there are no times.
+ */
+export function currentHourIndex(times: string[], now = new Date(), fallback = 0): number {
+  if (!times.length) return fallback;
+  const o = skopjeParts(now);
+  const stamp = `${o.year}-${o.month}-${o.day}T${o.hour === '24' ? '00' : o.hour}:00`;
+  let i = 0;
+  while (i + 1 < times.length && times[i + 1]! <= stamp) i++;
+  return i;
+}
+
 /** Forecasts are issued on a fixed rhythm, as Alpine services do: 08:00 and 17:00 Skopje time. */
 const ISSUE_HOURS = [8, 17];
 

@@ -2,7 +2,7 @@
   // Hour-by-hour forecast for one point: stacked panels on one shared time axis
   // (new snow, rain, temperature, ridge wind). One scale per panel, never two in one.
   import { loadData } from '#lib/data.ts';
-  import { dayLabel, num } from '#lib/format.ts';
+  import { currentHourIndex, dayLabel, num } from '#lib/format.ts';
   import { fill } from '#lib/i18n.ts';
   import { t } from '#lib/state.svelte.ts';
   import type { HourlyPoint } from '#lib/types.ts';
@@ -32,6 +32,14 @@
 
   const s = $derived(t());
   const h = $derived(points.find((p) => p.id === pointId));
+
+  // The "now" line follows the clock: the file's now_index is the hour the forecast was issued.
+  let clock = $state(Date.now());
+  $effect(() => {
+    const id = setInterval(() => (clock = Date.now()), 60e3);
+    return () => clearInterval(id);
+  });
+  const nowI = $derived(h ? currentHourIndex(h.time, new Date(clock), h.now_index) : 0);
 
   let width = $state(320);
   const L = 30, R = 8;
@@ -115,7 +123,7 @@
     {@const { snowP, rainP, tempP, windP, height } = layout}
     <svg {width} {height} viewBox="0 0 {width} {height}" role="img" aria-label={`${fill(s.chart_title, { elev: h.elevation })}. ${s.chart_summary}`}
       onpointermove={onMove} onpointerleave={() => (hover = null)} onpointerdown={onMove}>
-      <rect x={L} y={0} width={x(h.now_index) - L} height={height - 6} class="past" />
+      <rect x={L} y={0} width={x(nowI) - L} height={height - 6} class="past" />
       {#each midnights as m (m.i)}
         <line x1={x(m.i)} x2={x(m.i)} y1={snowP.top} y2={windP.top + windP.h} class="day" />
         {#if m.i + 12 < n}
@@ -157,8 +165,8 @@
       <line x1={L} x2={L + plotW} y1={windP.top + windP.h} y2={windP.top + windP.h} class="base" />
       <path d={linePath(h.wind_kmh, windP.top, windP.h, 0, wMax)} class="wind" />
 
-      <line x1={x(h.now_index)} x2={x(h.now_index)} y1={snowP.top - 2} y2={windP.top + windP.h} class="now" />
-      <text x={x(h.now_index) + 3} y={snowP.top + 8} class="nowlabel">{s.chart_now}</text>
+      <line x1={x(nowI)} x2={x(nowI)} y1={snowP.top - 2} y2={windP.top + windP.h} class="now" />
+      <text x={x(nowI) + 3} y={snowP.top + 8} class="nowlabel">{s.chart_now}</text>
 
       {#if hover !== null}
         <line x1={x(hover)} x2={x(hover)} y1={snowP.top} y2={windP.top + windP.h} class="cross" />
