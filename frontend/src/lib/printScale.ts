@@ -1,5 +1,8 @@
 // The printed map is at a fixed scale, so 1 cm on paper is always the same ground distance.
 
+/** Map frame on paper, in mm (full content width of an A4 page). */
+export const MAP_MM = { width: 190, height: 172 };
+
 /** Map scale of the conditions sheet: 1:25,000 (1 mm on paper = 25 m on the ground). */
 export const PRINT_SCALE = 25000;
 

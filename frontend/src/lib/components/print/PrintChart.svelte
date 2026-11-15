@@ -121,17 +121,17 @@
 </svg>
 
 <style>
-  svg { display: block; overflow: visible; font-family: system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+  svg { display: block; overflow: visible; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-variant-numeric: tabular-nums; }
   .past { fill: #eef1f4; }
   .day { stroke: #c9d1da; stroke-width: 0.2; }
-  .tick, .axis { font-size: 2.4px; fill: #5e6b78; }
-  .title { font-size: 2.7px; font-weight: 700; fill: #17283a; }
+  .tick, .axis { font-size: 2.47px; fill: #5b6672; } /* 7 pt */
+  .title { font-size: 3.17px; font-weight: 700; fill: #111820; } /* 9 pt */
   .base { stroke: #9aa6b2; stroke-width: 0.2; }
   .zero { stroke: #2468a8; stroke-width: 0.25; stroke-dasharray: 0.8 0.8; }
   .snow { fill: #2468a8; }
   .rain { fill: #1f9e89; }
-  .ln { fill: none; stroke: #17283a; stroke-width: 0.45; stroke-linejoin: round; stroke-linecap: round; }
-  .arrow { fill: #17283a; }
-  .now { stroke: #17283a; stroke-width: 0.25; stroke-dasharray: 0.6 0.6; }
-  .nowt { font-size: 2.4px; font-weight: 700; fill: #17283a; }
+  .ln { fill: none; stroke: #111820; stroke-width: 0.45; stroke-linejoin: round; stroke-linecap: round; }
+  .arrow { fill: #111820; }
+  .now { stroke: #111820; stroke-width: 0.25; stroke-dasharray: 0.6 0.6; }
+  .nowt { font-size: 2.47px; font-weight: 700; fill: #111820; }
 </style>

@@ -46,7 +46,7 @@ Ctrl/Cmd+P on a place prints the same document. The hourly series is always load
 **Page 1: map and conditions**
 - Header as now (brand, place, issued / printed, weather concerns, not-a-rating notice). Document title
   "Conditions sheet" / "Лист со услови".
-- Map: full content width (190 mm), 155 mm high, at exactly 1:25,000: ground width = frame width in mm
+- Map: full content width (190 mm), 172 mm high, at exactly 1:25,000: ground width = frame width in mm
   × 25 m. Centre = the middle of the place's forecast points (not the place's `center`, which can sit at one
   end: at Kožuf it put the summit point off the map). North up and flat, whatever the screen map shows.
   Slope layer on, aspect off (as now).

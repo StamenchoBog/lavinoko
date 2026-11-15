@@ -70,6 +70,8 @@ test('a forecast that missed its scheduled update is flagged, and replaced when 
   const notice = page.getByRole('status').filter({ hasText: 'newer forecast' });
   await expect(notice).toBeVisible({ timeout: 4_000 });
   await expect(notice).toBeHidden({ timeout: 10_000 });
+  // Later requests may still be waiting in the slow route: drop them, or they fail the next test.
+  await context.unrouteAll({ behavior: 'ignoreErrors' });
 });
 
 test('following a place asks the browser to keep stored data', async ({ page }) => {

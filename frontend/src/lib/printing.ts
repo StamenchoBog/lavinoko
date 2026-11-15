@@ -4,11 +4,9 @@ import { tick } from 'svelte';
 import { loadData } from './data';
 import { byHeight } from './format';
 import { mapHandle } from './mapHandle';
-import { frameCenter, PRINT_SCALE, withTimeout } from './printScale';
+import { frameCenter, MAP_MM, PRINT_SCALE, withTimeout } from './printScale';
 import { currentPlace, print } from './state.svelte';
 
-/** Map frame on paper, in mm. */
-export const MAP_MM = { width: 190, height: 155 };
 /** Print map picture size in CSS pixels (about 200 dpi); its aspect ratio equals the map frame. */
 export const PRINT_MAP = { width: 1500, height: Math.round((1500 * MAP_MM.height) / MAP_MM.width) };
 
@@ -34,8 +32,8 @@ export async function printPlace(): Promise<void> {
   print.map = pic;
   print.hourly = hourly;
   await tick();
-  const img = document.querySelector<HTMLImageElement>('.print-doc img');
-  if (img) await img.decode().catch(() => {});
+  // Every picture (logo and map) must be decoded before the print dialog takes its copy.
+  await Promise.all([...document.querySelectorAll<HTMLImageElement>('.print-doc img')].map((img) => img.decode().catch(() => {})));
   window.print();
 }
 

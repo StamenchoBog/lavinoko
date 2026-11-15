@@ -38,7 +38,11 @@
   const elevSpan = $derived(points[0] ? `${points.at(-1)?.elevation}–${points[0].elevation} m` : '');
   const coord = (lat: number, lon: number) =>
     `${lat.toFixed(5)}° N, ${lon.toFixed(5)}° E`;
-  const range = (r: [number, number] | undefined) => (r && r[1] - r[0] >= 1 ? fill(s.range_models, { lo: num(r[0]), hi: num(r[1]) }) : '');
+  // The range only when it adds something ("Kožuf · Kožuf" says nothing).
+  const rangeName = $derived(place && place.range[ui.lang] !== place.name[ui.lang] ? place.range[ui.lang] : '');
+  const freezing = $derived(
+    top ? `${num(Math.min(...points.map((p) => p.next72.freezing_level_min_m ?? Infinity)))}–${num(Math.max(...points.map((p) => p.next72.freezing_level_max_m ?? -Infinity)))} m` : ''
+  );
 
   let printedAt = $state(skopjeTime(new Date().toISOString()));
   let qr: { size: number; path: string } | null = $state(null);
@@ -80,12 +84,12 @@
   <header class:compact>
     <div class="brandrow">
       <span class="brand"><img src={asset('logo.png')} alt="" />{s.brand}</span>
-      <span class="doc">{title}<span class="pg">{page}/{pages}</span></span>
+      <span class="doc">{title} <span class="pg">{page}/{pages}</span></span>
     </div>
     <div class="titlerow">
       <div>
         <h1>{place?.name[ui.lang]}</h1>
-        <p class="sub">{place?.range[ui.lang]} · {elevSpan}</p>
+        <p class="sub">{#if rangeName}{rangeName} · {/if}{elevSpan}</p>
       </div>
       <div class="meta">
         <p>{fill(s.issued_short, { issued: data.weather ? skopjeTime(data.weather.issued_utc) : '', next: nextIssue() })}</p>
@@ -107,13 +111,17 @@
   </header>
 {/snippet}
 
-{#snippet footer()}
+{#snippet footer(full: boolean)}
   <footer>
     <div class="credits">
       <p>{s.disclaimer}</p>
-      <p>Weather data by Open-Meteo.com (CC BY 4.0). {data.meta?.source}. Map: © OpenMapTiles © OpenStreetMap contributors (ODbL).</p>
+      {#if full}
+        <p>Weather data by Open-Meteo.com (CC BY 4.0). {data.meta?.source}. Map: © OpenMapTiles © OpenStreetMap contributors (ODbL).</p>
+      {:else}
+        <p>{s.credits_short}</p>
+      {/if}
     </div>
-    {#if qr}
+    {#if !full && qr}
       <div class="qr">
         <svg viewBox="-2 -2 {qr.size + 4} {qr.size + 4}" aria-label={s.qr_label}><rect x="-2" y="-2" width={qr.size + 4} height={qr.size + 4} fill="#fff" /><path d={qr.path} /></svg>
         <span>{s.qr_label}</span>
@@ -127,67 +135,52 @@
     <section class="page">
       {@render header(1, s.doc_sheet, false)}
 
-      <div class="stats">
-        <div><span class="lbl">{s.stat_new_snow}</span><b>{num(top.next72.snow_cm)}<small> cm</small></b><span class="sm">{range(top.spread?.snow_next72_cm)}</span></div>
-        <div><span class="lbl">{s.stat_last24}</span><b>{num(top.past72.snow_24h_cm)}<small> cm</small></b><span class="sm">{s.col_wind} {num(top.past72.wind_24h_max_kmh)} km/h</span></div>
-        <div><span class="lbl">{s.stat_wind}</span><b>{@render arrow(top.next72.wind.from)}{num(top.next72.wind.max_kmh)}<small> km/h</small></b><span class="sm">{top.next72.wind.from ? top.next72.wind.from : ''}</span></div>
-        <div><span class="lbl">{s.stat_freezing}</span><b>{num(top.next72.freezing_level_min_m)}<small>–{num(top.next72.freezing_level_max_m)} m</small></b><span class="sm">72 h</span></div>
-        <div><span class="lbl">{s.stat_temp}</span><b>{num(top.next72.temp_min_c)}<small>…{num(top.next72.temp_max_c)} °C</small></b><span class="sm">{top.elevation} m</span></div>
-      </div>
-
       <PrintMap pic={print.map} labels={points.map((p) => `${p.elevation} m`)} />
 
-      <div class="cols">
-        <div>
-          <h2>{s.by_elevation}</h2>
-          <table>
-            <thead><tr><th></th><th>{s.col_snow}</th><th>{s.col_wind}</th><th>°C</th></tr></thead>
-            <tbody>
-              {#each points as p, i (p.id)}
-                <tr>
-                  <td><span class="num">{i + 1}</span>{p.elevation} m <small>{p.name[ui.lang]}</small></td>
-                  <td>{num(p.next72.snow_cm)} cm</td>
-                  <td>{@render arrow(p.next72.wind.from)}{num(p.next72.wind.max_kmh)} {p.next72.wind.from ? p.next72.wind.from : ''}</td>
-                  <td>{num(p.next72.temp_min_c)}…{num(p.next72.temp_max_c)}</td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        </div>
-        <div>
-          <h2>{fill(s.next_days, { elev: top.elevation })}</h2>
-          <div class="days">
-            {#each days as d (d.date)}
-              <div>
-                <b>{d.when === 'today' ? s.today : dayLabel(d.date, s.weekdays)}</b>
-                <span class="snowv">{d.snow_cm ? `${num(d.snow_cm)} cm` : '–'}</span>
-                <span>{d.rain_mm ? `${num(d.rain_mm, 1)} mm` : ''}</span>
-                <span>{num(d.temp_min_c)}…{num(d.temp_max_c)} °C</span>
-                <span>{@render arrow(d.wind_from)}{num(d.wind_max_kmh)} km/h</span>
-              </div>
+      <div>
+        <h2>{s.by_elevation}</h2>
+        <table>
+          <thead>
+            <tr>
+              <th></th><th>{s.stat_new_snow}</th><th>{s.stat_last24}</th><th>{s.stat_wind}</th><th>{s.stat_temp}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each points as p, i (p.id)}
+              <tr>
+                <td><span class="num">{i + 1}</span>{p.elevation} m <span class="muted">{p.name[ui.lang]}</span></td>
+                <td><b>{num(p.next72.snow_cm)}</b> cm</td>
+                <td>{num(p.past72.snow_24h_cm)} cm</td>
+                <td>{@render arrow(p.next72.wind.from)}<b>{num(p.next72.wind.max_kmh)}</b> km/h {p.next72.wind.from ?? ''}</td>
+                <td>{num(p.next72.temp_min_c)} … {num(p.next72.temp_max_c)} °C</td>
+              </tr>
             {/each}
-          </div>
-        </div>
+          </tbody>
+        </table>
+        <p class="tnote">{s.stat_freezing}: <b>{freezing}</b></p>
       </div>
 
-      <p class="emline"><b>112:</b> {s.emergency_line}</p>
+      <p class="emline"><b>112</b> {s.emergency_line}</p>
 
-      {@render footer()}
+      {@render footer(false)}
     </section>
 
-      <section class="page">
-        {@render header(2, s.doc_forecast, true)}
+    <section class="page">
+      {@render header(2, s.doc_forecast, true)}
 
-        {#if hourlyTop}
+      {#if hourlyTop}
+        <div>
           <h2>{fill(s.chart_title, { elev: top.elevation })}</h2>
           <PrintChart h={hourlyTop} />
-        {/if}
+        </div>
+      {/if}
 
+      <div>
         <h2>{s.matrix_title}</h2>
         <table class="matrix">
           <thead>
             <tr><th></th>{#each points as p, i (p.id)}<th colspan="3" class="grp"><span class="num">{i + 1}</span>{p.elevation} m</th>{/each}</tr>
-            <tr><th></th>{#each points as p (p.id)}<th>{s.col_snow}</th><th>{s.col_wind}</th><th>°C</th>{/each}</tr>
+            <tr><th></th>{#each points as p (p.id)}<th class="grp">{s.col_snow}</th><th>{s.col_wind}</th><th>°C</th>{/each}</tr>
           </thead>
           <tbody>
             {#each days as d (d.date)}
@@ -196,34 +189,36 @@
                 {#each points as p (p.id)}
                   {@const pd = p.days.find((x) => x.date === d.date)}
                   <td class="grp">{pd?.snow_cm ? `${num(pd.snow_cm)} cm` : '–'}</td>
-                  <td>{num(pd?.wind_max_kmh)} {pd?.wind_from ? pd.wind_from : ''}</td>
-                  <td>{num(pd?.temp_min_c)}…{num(pd?.temp_max_c)}</td>
+                  <td>{num(pd?.wind_max_kmh)} {pd?.wind_from ?? ''}</td>
+                  <td>{num(pd?.temp_min_c)} … {num(pd?.temp_max_c)}</td>
                 {/each}
               </tr>
             {/each}
           </tbody>
         </table>
+      </div>
 
-        <div class="cols2">
-          <div class="obs">
-            <h2>{s.obs_title}</h2>
-            <div class="fields">
-              <div>{s.obs_when}</div>
-              <div>{s.obs_where}</div>
-              <div>{s.obs_elev}</div>
-              <div class="aspect">{s.obs_aspect}<span>{#each COMPASS as c (c)}<b>{c}</b>{/each}</span></div>
-            </div>
-            <h3>{s.signs_title}</h3>
-            <ul class="checks">{#each s.signs_items as it (it)}<li class="tick"><i></i>{it}</li>{/each}</ul>
-            <p class="note">{s.signs_note}</p>
-            <h3>{s.obs_seen}</h3>
-            <div class="lines">{#each Array(3) as _, i (i)}<span></span>{/each}</div>
+      <div class="cols2">
+        <div class="obs">
+          <h2>{s.obs_title}</h2>
+          <div class="fields">
+            <div>{s.obs_when}</div>
+            <div>{s.obs_where}</div>
+            <div>{s.obs_elev}</div>
+            <div class="aspect">{s.obs_aspect}<span>{#each COMPASS as c (c)}<span>{c}</span>{/each}</span></div>
           </div>
+          <h3>{s.signs_title}</h3>
+          <ul class="checks">{#each s.signs_items as it (it)}<li class="tick"><i></i>{it}</li>{/each}</ul>
+          <p class="muted">{s.signs_note}</p>
+          <h3>{s.obs_seen}</h3>
+          <div class="lines">{#each Array(4) as _, i (i)}<span></span>{/each}</div>
+        </div>
 
+        <div class="side">
           <div class="emergency">
             <h2>{s.sheet_emergency}: 112</h2>
-            <p class="em">{s.sheet_112}</p>
-            <p class="say"><b>{s.call_say}</b> {s.call_items.join(' · ')}</p>
+            <p>{s.sheet_112}</p>
+            <p><b>{s.call_say}</b> {s.call_items.join(' · ')}</p>
             <p class="burial">{s.burial}</p>
             <h3>{s.map_points}</h3>
             <ol>
@@ -231,112 +226,100 @@
                 <li>{p.elevation} m — {coord(p.lat, p.lon)}</li>
               {/each}
             </ol>
-            <p class="other">{s.sheet_other}</p>
+            <p class="muted">{s.sheet_other}</p>
+          </div>
+          <div class="about">
+            <h2>{s.about_title}</h2>
+            <p class="muted">{fill(s.about_weather, { level: top.wind_level })} {s.consensus_note}</p>
           </div>
         </div>
+      </div>
 
-        <div class="about">
-          <h2>{s.about_title}</h2>
-          <p>{fill(s.about_weather, { level: top.wind_level })} {s.consensus_note}</p>
-        </div>
-
-        {@render footer()}
-      </section>
+      {@render footer(true)}
+    </section>
   </div>
 {/if}
 
 <style>
   .print-doc { display: none; }
 
+  /* Swiss-style sheet: one typeface, four sizes (18 / 11 / 9 / 7 pt), flush left, hairline rules,
+     a strict 190 mm column. Size follows importance: place, then the weather message, then data. */
   @media print {
-    .print-doc { display: block; color: #17283a; font: 8.5pt/1.3 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+    .print-doc {
+      display: block; color: #111820;
+      font: 9pt/1.3 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
+      font-variant-numeric: tabular-nums;
+    }
     .page {
-      width: 210mm; height: 296mm; padding: 9mm 10mm 8mm; box-sizing: border-box; overflow: hidden;
-      display: flex; flex-direction: column; gap: 2mm; break-after: page;
+      width: 210mm; height: 296mm; padding: 10mm 10mm 8mm; box-sizing: border-box; overflow: hidden;
+      display: flex; flex-direction: column; gap: 3mm; break-after: page;
     }
     .page:last-child { break-after: auto; }
     p { margin: 0; }
-    h2 { font-size: 8.5pt; margin: 0 0 1.2mm; }
-    h3 { font-size: 7.5pt; margin: 1.2mm 0 0.4mm; }
+    h1 { font-size: 18pt; line-height: 1.05; margin: 0; letter-spacing: -0.015em; font-weight: 700; }
+    h2 { font-size: 9pt; margin: 0 0 1.2mm; font-weight: 700; }
+    h3 { font-size: 9pt; margin: 2.2mm 0 0.8mm; font-weight: 700; }
+    .muted, .meta, .pg, .credits, th { color: #5b6672; }
+    .meta, .pg, .credits, th, .tnote, .qr span, .fields > div, .checks + .muted { font-size: 7pt; }
 
     /* Header */
-    header { display: grid; gap: 1.1mm; }
-    .brandrow { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1.4mm; border-bottom: 0.5mm solid #17283a; }
-    .brand { display: flex; align-items: center; gap: 2mm; font-weight: 800; font-size: 10pt; }
-    .brand img { width: 9mm; height: auto; }
-    .doc { font-weight: 700; font-size: 9pt; display: flex; align-items: center; gap: 2.5mm; }
-    .pg { font-weight: 600; color: #5e6b78; }
+    header { display: grid; gap: 1.6mm; }
+    .brandrow { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1.6mm; border-bottom: 0.5mm solid #111820; }
+    .brand { display: flex; align-items: center; gap: 2mm; font-weight: 700; }
+    .brand img { width: 6mm; height: auto; }
+    .doc { font-weight: 700; }
     .titlerow { display: flex; justify-content: space-between; align-items: flex-end; gap: 6mm; }
-    h1 { font-size: 18pt; line-height: 1.05; margin: 0; letter-spacing: -0.01em; }
-    .compact h1 { font-size: 14pt; }
-    .sub { color: #5e6b78; font-size: 9pt; }
-    .meta { text-align: right; font-size: 7.5pt; color: #5e6b78; }
-    .status { display: flex; flex-wrap: wrap; gap: 0.6mm 4mm; padding: 1.3mm 2.5mm; border-radius: 1.5mm; background: #e9f1f9; font-weight: 600; font-size: 9pt; }
-    .status.attention { background: #fdf5e2; }
-    .status.serious { background: #fbe9e7; }
+    .sub { color: #5b6672; }
+    .meta { text-align: right; }
+    .status { display: flex; flex-wrap: wrap; gap: 0.8mm 5mm; padding: 0.4mm 0 0.4mm 2.5mm; border-left: 1.2mm solid #2468a8; font-size: 11pt; font-weight: 700; }
+    .status.attention { border-left-color: #d08a00; }
+    .status.serious { border-left-color: #c62828; }
     .concern { display: inline-flex; align-items: center; gap: 1.5mm; }
-    .concern small { font-weight: 400; color: #5e6b78; font-size: 7.5pt; }
-    .rating { font-size: 7.5pt; font-weight: 700; }
+    .concern small { font-size: 7pt; font-weight: 400; color: #5b6672; }
+    .compact h1 { font-size: 11pt; }
+    .rating { font-weight: 700; }
 
-    /* Key figures */
-    .stats { display: grid; grid-template-columns: repeat(5, 1fr); border: 0.3mm solid #c9d1da; border-radius: 1.5mm; }
-    .stats > div { display: grid; padding: 1.1mm 2.2mm; border-left: 0.3mm solid #c9d1da; }
-    .stats > div:first-child { border-left: 0; }
-    .lbl { font-size: 7pt; color: #5e6b78; }
-    .stats b { font-size: 14pt; line-height: 1.15; display: flex; align-items: baseline; gap: 0.6mm; font-variant-numeric: tabular-nums; }
-    .stats b small { font-size: 8pt; font-weight: 600; }
-    .stats .sm { font-size: 6.8pt; color: #5e6b78; min-height: 2.6mm; }
-    .stats .warrow { width: 3.6mm; height: 3.6mm; align-self: center; }
-    .warrow { width: 2.6mm; height: 2.6mm; display: inline-block; vertical-align: -0.4mm; margin-right: 0.6mm; fill: #17283a; }
+    /* Tables: hairlines only */
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: right; font-weight: 400; padding: 0 1.5mm 0.8mm; border-bottom: 0.3mm solid #111820; white-space: nowrap; }
+    td { text-align: right; padding: 1mm 1.5mm; border-bottom: 0.15mm solid #c3cad2; white-space: nowrap; }
+    th:first-child, td:first-child { text-align: left; padding-left: 0; }
+    td:first-child .muted { margin-left: 1mm; }
+    .num { display: inline-grid; place-items: center; width: 3.8mm; height: 3.8mm; border-radius: 50%; background: #111820; color: #fff; font-size: 7pt; font-weight: 700; margin-right: 1.5mm; vertical-align: 0.2mm; }
+    .warrow { width: 2.8mm; height: 2.8mm; display: inline-block; vertical-align: -0.3mm; margin-right: 0.8mm; fill: #111820; }
+    .tnote { margin-top: 1mm; }
+    .matrix th.grp, .matrix td.grp { border-left: 0.15mm solid #c3cad2; }
+    .matrix thead tr:first-child th { text-align: center; color: #111820; font-weight: 700; border-bottom: 0; }
 
-    /* Conditions + emergency */
-    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
-    table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-    th { text-align: right; font-weight: 600; font-size: 7pt; color: #5e6b78; padding: 0 1.2mm 0.6mm; border-bottom: 0.3mm solid #17283a; }
-    td { text-align: right; padding: 0.7mm 1.2mm; border-bottom: 0.2mm solid #c9d1da; white-space: nowrap; }
-    th:first-child, td:first-child { text-align: left; }
-    td small { color: #5e6b78; font-size: 7pt; margin-left: 1mm; }
-    .num { display: inline-grid; place-items: center; width: 3.6mm; height: 3.6mm; border-radius: 50%; background: #17283a; color: #fff; font-size: 6.5pt; font-weight: 800; margin-right: 1.2mm; vertical-align: 0.1mm; }
-    .days { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5mm; }
-    .days > div { display: grid; gap: 0.1mm; padding: 1.1mm 1.6mm; border: 0.25mm solid #c9d1da; border-radius: 1.2mm; font-size: 7.3pt; }
-    .days b { font-size: 8pt; }
-    .snowv { color: #2468a8; font-weight: 700; font-size: 9pt; }
-    .cols h2:not(:first-child) { margin-top: 1.8mm; }
+    .emline { padding: 1.4mm 0; border-top: 0.5mm solid #111820; border-bottom: 0.15mm solid #c3cad2; }
+    .emline b { font-size: 11pt; margin-right: 2mm; color: #c62828; }
 
-    .emergency { border: 0.5mm solid #17283a; border-radius: 1.8mm; padding: 1.8mm 3mm; }
-    .em { font-weight: 700; margin-top: 0.6mm; }
-    .say { margin-top: 1mm; font-size: 7.3pt; }
-    .burial { margin-top: 1mm; font-size: 7.3pt; padding: 1mm 1.8mm; background: #fbe9e7; border-radius: 1mm; }
-    ol { margin: 0; padding-left: 4.5mm; font-size: 7.5pt; font-variant-numeric: tabular-nums; }
-    .other { margin-top: 0.8mm; font-size: 7pt; color: #5e6b78; }
-
-    .emline { font-size: 8pt; padding: 1.2mm 2.5mm; border: 0.4mm solid #17283a; border-radius: 1.5mm; }
-    .emline b { font-size: 11pt; font-weight: 900; margin-right: 1.5mm; }
-
-    /* Field observation */
-    .obs { border: 0.3mm solid #9aa6b2; border-radius: 1.8mm; padding: 1.8mm 3mm; }
-    .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5mm; }
-    .fields > div { border: 0.25mm solid #9aa6b2; border-radius: 1mm; padding: 0.6mm 1.5mm; font-size: 6.8pt; color: #5e6b78; height: 8mm; box-sizing: border-box; }
-    .fields .aspect span { display: flex; justify-content: space-between; margin-top: 0.8mm; color: #17283a; font-size: 7pt; }
-    .checks li { display: flex; align-items: center; gap: 1.2mm; }
-    .checks i { width: 3mm; height: 3mm; border: 0.3mm solid #17283a; border-radius: 0.5mm; display: inline-block; flex: none; }
-
-    /* Page 2 */
-    .matrix th.grp, .matrix td.grp { border-left: 0.3mm solid #c9d1da; }
-    .matrix thead tr:first-child th { text-align: center; color: #17283a; font-size: 8pt; border-bottom: 0; }
-    .cols2 { display: grid; grid-template-columns: 1.15fr 1fr; gap: 5mm; align-items: start; }
-    .checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.2mm; font-size: 7.8pt; }
-    .note { margin-top: 1.8mm; font-size: 7.5pt; color: #5e6b78; }
-    .lines { display: grid; gap: 6mm; padding-top: 4mm; }
-    .lines span { border-bottom: 0.25mm solid #9aa6b2; }
-    .about p { font-size: 7.5pt; color: #5e6b78; }
+    /* Page 2: observation (left, the larger) | emergency and about (right) */
+    .cols2 { display: grid; grid-template-columns: 1.2fr 1fr; gap: 6mm; align-items: start; }
+    .obs { border-top: 0.5mm solid #111820; padding-top: 1.6mm; }
+    .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 0.15mm solid #c3cad2; border-left: 0.15mm solid #c3cad2; }
+    .fields > div { height: 11mm; box-sizing: border-box; padding: 0.8mm 1.5mm; border-right: 0.15mm solid #c3cad2; border-bottom: 0.15mm solid #c3cad2; }
+    .fields .aspect > span { display: flex; justify-content: space-between; margin-top: 1.6mm; color: #111820; font-weight: 700; }
+    .checks { list-style: none; margin: 0 0 1mm; padding: 0; display: grid; gap: 1.4mm; }
+    .checks li { display: flex; align-items: center; gap: 1.8mm; }
+    .checks i { width: 3.2mm; height: 3.2mm; border: 0.3mm solid #111820; display: inline-block; flex: none; }
+    .lines { display: grid; gap: 7mm; padding-top: 6mm; }
+    .lines span { border-bottom: 0.15mm solid #8a949e; }
+    .side { display: grid; gap: 4mm; }
+    .emergency { border-top: 0.5mm solid #c62828; padding-top: 1.6mm; display: grid; gap: 1.2mm; }
+    .emergency h2 { color: #c62828; }
+    .emergency h3 { margin: 0.8mm 0 0; }
+    .burial { padding-left: 2mm; border-left: 0.8mm solid #c62828; }
+    ol { margin: 0; padding-left: 4.5mm; }
+    .about { border-top: 0.15mm solid #c3cad2; padding-top: 1.6mm; }
 
     /* Footer */
-    footer { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; gap: 6mm; padding-top: 1.6mm; border-top: 0.3mm solid #c9d1da; }
-    .credits { font-size: 6.3pt; color: #5e6b78; display: grid; gap: 0.6mm; }
-    .credits p:first-child { color: #17283a; font-weight: 600; }
-    .qr { display: grid; justify-items: center; gap: 0.6mm; font-size: 6pt; color: #5e6b78; flex: none; }
-    .qr svg { width: 15mm; height: 15mm; }
-    .qr path { fill: #17283a; }
+    footer { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; gap: 6mm; padding-top: 1.6mm; border-top: 0.15mm solid #c3cad2; }
+    .credits { display: grid; gap: 0.6mm; }
+    .credits p:first-child { color: #111820; font-weight: 700; }
+    .qr { display: grid; justify-items: center; gap: 0.6mm; flex: none; }
+    .qr svg { width: 16mm; height: 16mm; }
+    .qr path { fill: #111820; }
   }
 </style>

@@ -1,15 +1,27 @@
 <script lang="ts">
-  import type { MapPicture } from '#lib/mapHandle.ts';
+  import type { GridLine, MapPicture } from '#lib/mapHandle.ts';
+  import { MAP_MM } from '#lib/printScale.ts';
   import { data, t } from '#lib/state.svelte.ts';
 
   let { pic, labels }: { pic: MapPicture | null; labels: string[] } = $props();
   const s = $derived(t());
 
   // The overlay uses the picture's own pixel space, so grid and points line up exactly.
-  const W = $derived(pic?.width ?? 1600);
-  const H = $derived(pic?.height ?? 724);
+  const W = $derived(pic?.width ?? 0);
+  const H = $derived(pic?.height ?? 0);
 
   const decimals = $derived(pic ? (pic.step < 0.01 ? 3 : pic.step < 0.1 ? 2 : 1) : 2);
+
+  /** Fine ticks along the frame edges, five per grid step (about 200 m), for reading a position. */
+  function minor(lines: GridLine[]): number[] {
+    if (lines.length < 2) return [];
+    const d = (lines[1]!.at - lines[0]!.at) / 5;
+    const out: number[] = [];
+    for (let at = lines[0]!.at - 5 * d; at < 1; at += d) if (at > 0) out.push(at);
+    return out;
+  }
+  const lonTicks = $derived(pic ? minor(pic.lons) : []);
+  const latTicks = $derived(pic ? minor(pic.lats) : []);
 
   // Two-segment scale bar of a round length, about a fifth of the width.
   const scale = $derived.by(() => {
@@ -22,7 +34,7 @@
 </script>
 
 <figure>
-  <div class="frame">
+  <div class="frame" style="width: {MAP_MM.width}mm; height: {MAP_MM.height}mm">
     {#if pic}
       <img src={pic.url} alt="" />
       <svg viewBox="0 0 {W} {H}" preserveAspectRatio="none" aria-hidden="true">
@@ -33,6 +45,15 @@
         {#each pic.lats as g (g.value)}
           <line y1={g.at * H} y2={g.at * H} x1="0" x2={W} class="grid" />
           <text x="8" y={g.at * H - 6} class="glabel">{g.value.toFixed(decimals)}°</text>
+        {/each}
+
+        {#each lonTicks as at (at)}
+          <line x1={at * W} x2={at * W} y1="0" y2="14" class="minor" />
+          <line x1={at * W} x2={at * W} y1={H - 14} y2={H} class="minor" />
+        {/each}
+        {#each latTicks as at (at)}
+          <line y1={at * H} y2={at * H} x1="0" x2="14" class="minor" />
+          <line y1={at * H} y2={at * H} x1={W - 14} x2={W} class="minor" />
         {/each}
 
         {#each pic.points as p, i (i)}
@@ -75,19 +96,20 @@
 
 <style>
   figure { margin: 0; }
-  /* Same size as MAP_MM in printing.ts: the picture is drawn for exactly this frame (1:25,000). */
-  .frame { position: relative; width: 190mm; height: 155mm; border: 0.3mm solid #17283a; overflow: hidden; background: #f3f5f7; }
+  /* Size from MAP_MM: the picture is drawn for exactly this frame (1:25,000). */
+  .frame { position: relative; border: 0.3mm solid #17283a; overflow: hidden; background: #f3f5f7; }
   img, svg { position: absolute; inset: 0; width: 100%; height: 100%; }
   img { object-fit: fill; }
-  .grid { stroke: #17283a; stroke-opacity: 0.35; stroke-width: 1.2; }
-  .glabel { font: 600 19px system-ui, sans-serif; fill: #17283a; paint-order: stroke; stroke: #fff; stroke-width: 5px; }
+  .grid { stroke: #111820; stroke-opacity: 0.35; stroke-width: 1.2; }
+  .minor { stroke: #111820; stroke-width: 1.6; }
+  .glabel { font: 600 19px 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #111820; paint-order: stroke; stroke: #fff; stroke-width: 5px; }
   .pt { fill: #17283a; stroke: #fff; stroke-width: 4; }
-  .ptn { font: 800 21px system-ui, sans-serif; fill: #fff; }
-  .ptl { font: 700 21px system-ui, sans-serif; fill: #17283a; paint-order: stroke; stroke: #fff; stroke-width: 6px; }
+  .ptn { font: 800 21px 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #fff; }
+  .ptl { font: 700 21px 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #111820; paint-order: stroke; stroke: #fff; stroke-width: 6px; }
   .box { fill: #fff; fill-opacity: 0.9; }
   .sb-dark { fill: #17283a; }
   .sb-light { fill: #fff; stroke: #17283a; stroke-width: 2; }
-  .sbt { font: 700 20px system-ui, sans-serif; fill: #17283a; }
+  .sbt { font: 700 20px 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #111820; }
   .north { fill: #17283a; }
   .missing { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; padding: 10mm; text-align: center; font-size: 9pt; color: #5e6b78; }
   figcaption { display: flex; justify-content: space-between; gap: 4mm; font-size: 7pt; margin-top: 1.2mm; }

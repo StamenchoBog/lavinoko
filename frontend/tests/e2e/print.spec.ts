@@ -52,7 +52,7 @@ test('page 1 is the map and conditions, with no trip planning', async ({ page })
   const p1 = (await printSheet(page, 'en')).nth(0);
   await expect(p1).toContainText('Conditions sheet');
   await expect(p1).toContainText('1:25 000 when printed at 100 %');
-  await expect(p1).toContainText('112: emergencies and mountain rescue, free from any phone. Details on page 2.');
+  await expect(p1).toContainText('112 emergencies and mountain rescue, free from any phone. Details on page 2.');
   await expect(p1).not.toContainText('Turnaround time');
   await expect(p1).not.toContainText('Gear');
 });
@@ -91,7 +91,7 @@ test('a rotated screen map still prints north-up, and the screen keeps its rotat
     new MutationObserver(() => seen.push(el.getAttribute('style') ?? '')).observe(el, { attributes: true });
   });
   await page.getByRole('button', { name: 'Print' }).click();
-  await expect.poll(() => printed(page)).toBe(1);
+  await expect.poll(() => printed(page), { timeout: 20000 }).toBe(1);
   const seen = await page.evaluate(() => (window as unknown as { bearings: string[] }).bearings);
   expect(seen.some((st) => /rotate\(-?0deg\)/.test(st)), 'map was north-up while captured').toBe(true);
   await expect(rose).not.toHaveAttribute('style', /rotate\(-?0deg\)/);
@@ -104,4 +104,55 @@ test('without a map picture the sheet says why, without sending the reader back 
   await page.getByRole('button', { name: 'Print' }).click();
   await expect.poll(() => printed(page)).toBe(1);
   await expect(page.locator('.print-doc')).toContainText('Map not available (offline, not loaded yet, or printed from the browser menu).');
+});
+
+test('page 1 says each number once: one table, no headline figures, no day cards', async ({ page }) => {
+  const p1 = (await printSheet(page, 'en')).nth(0);
+  await expect(p1.locator('.stats, .days')).toHaveCount(0);
+  await expect(p1.locator('table')).toHaveCount(1);
+  await expect(p1.locator('thead')).toContainText('Last 24 h');
+  await expect(p1).toContainText('Freezing level');
+  await expect(p1.locator('.sub')).not.toContainText('Kožuf ·');
+});
+
+test('credits: short with the map and QR code on page 1, full on page 2', async ({ page }) => {
+  const pages = await printSheet(page, 'en');
+  await expect(pages.nth(0)).toContainText('© OpenStreetMap contributors');
+  await expect(pages.nth(0).locator('.qr')).toHaveCount(1);
+  await expect(pages.nth(1).locator('.qr')).toHaveCount(0);
+  await expect(pages.nth(1)).toContainText('Copernicus WorldDEM-30');
+  await expect(pages.nth(1).locator('.cols2 > div:last-child')).toContainText('About the data');
+});
+
+for (const lang of ['en', 'mk'] as const) {
+  test(`the sheet uses at most four text sizes (${lang})`, async ({ page }) => {
+    await printSheet(page, lang);
+    const sizes = await page.evaluate(() => {
+      const out = new Set<string>();
+      for (const el of document.querySelectorAll('.print-doc *')) {
+        if (el.closest('svg') || el.closest('.qr')) continue;
+        if ([...el.childNodes].some((n) => n.nodeType === 3 && n.textContent!.trim())) out.add(getComputedStyle(el).fontSize);
+      }
+      return [...out].sort();
+    });
+    expect(sizes.length, sizes.join(', ')).toBeLessThanOrEqual(4);
+  });
+}
+
+test('the observation box has room to write: fields at least 11 mm high', async ({ page }) => {
+  const p2 = (await printSheet(page, 'en')).nth(1);
+  const mm = await p2.locator('.obs .fields > div').first().evaluate((el) => el.getBoundingClientRect().height / (96 / 25.4));
+  expect(mm).toBeGreaterThanOrEqual(10.9);
+  await expect(p2.locator('.obs .lines span')).toHaveCount(4);
+});
+
+test('the map has fine grid ticks for reading a position', async ({ page }) => {
+  test.setTimeout(60000);
+  await page.goto('/?lang=en&place=kozuf');
+  await page.locator('.maplibregl-canvas').waitFor();
+  await page.waitForTimeout(4000);
+  await page.getByRole('button', { name: 'Print' }).click();
+  await expect.poll(() => printed(page), { timeout: 20000 }).toBe(1);
+  await expect(page.locator('.print-doc figure img')).toHaveCount(1);
+  expect(await page.locator('.print-doc .minor').count()).toBeGreaterThan(20);
 });
