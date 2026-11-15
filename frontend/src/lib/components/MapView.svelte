@@ -28,12 +28,17 @@
     let cancelled = false;
     let created: MlMap | undefined;
     (async () => {
-      const [{ default: maplibregl }, { Protocol }] = await Promise.all([
+      // maplibre-gl 6 is an ES module without a default export: use the module namespace.
+      // Its worker is a separate file it looks for next to its own; bundling renames and moves
+      // that file, so Vite emits the worker as an asset (?url) and MapLibre is told where it is.
+      const [maplibregl, { default: workerUrl }, { Protocol }] = await Promise.all([
         import('maplibre-gl'),
+        import('maplibre-gl/dist/maplibre-gl-worker.mjs?url'),
         import('pmtiles'),
         import('maplibre-gl/dist/maplibre-gl.css')
       ]);
       if (cancelled) return;
+      maplibregl.setWorkerUrl(workerUrl);
       maplibregl.addProtocol('pmtiles', new Protocol().tile);
       MarkerClass = maplibregl.Marker;
 

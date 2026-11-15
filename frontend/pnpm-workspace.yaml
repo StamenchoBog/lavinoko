@@ -7,3 +7,9 @@ minimumReleaseAge: 10080
 # Packages may run install scripts only when listed here (true = allowed, false = reviewed and refused).
 # Any other package with a build script fails the install until it has been reviewed.
 allowBuilds: {}
+
+# Security fixes in indirect dependencies, until the packages that pull them in update themselves.
+# Remove an entry once `pnpm why <name>` shows the fixed version without it.
+overrides:
+  # GHSA-g3hv-75wg-m249 (medium, DoS): minimatch < 11.0.1. Used by ESLint / typescript-eslint at lint time only.
+  minimatch: 11.0.2
