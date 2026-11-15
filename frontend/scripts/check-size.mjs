@@ -24,11 +24,11 @@ function local(url, from) {
   return url.startsWith('/') ? join(root, url) : resolve(dirname(from), url);
 }
 
-for (const [tag] of html.matchAll(/<(link|script)\b[^>]*>/g)) {
-  const rel = tag.match(/\brel="([^"]+)"/)?.[1];
-  const url = tag.match(/\b(?:href|src)="([^"]+)"/)?.[1];
+for (const [tag] of html.matchAll(/<(link|script)\b[^>]*>/gi)) {
+  const rel = tag.match(/\brel="([^"]+)"/i)?.[1]?.toLowerCase();
+  const url = tag.match(/\b(?:href|src)="([^"]+)"/i)?.[1];
   if (!url) continue;
-  if (tag.startsWith('<script') || rel === 'modulepreload' || rel === 'stylesheet') queue.push(local(url, indexFile));
+  if (/^<script\b/i.test(tag) || rel === 'modulepreload' || rel === 'stylesheet') queue.push(local(url, indexFile));
 }
 // SvelteKit starts the app from an inline script: import("./_app/immutable/entry/start.js") etc.
 for (const [, url] of html.matchAll(/import\(\s*["']([^"']+\.js)["']\s*\)/g)) queue.push(local(url, indexFile));
