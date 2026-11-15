@@ -21,6 +21,6 @@
 
 <style>
   .wrap { position: relative; }
-  .btn { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 3px 10px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+  .btn { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 3px 10px; font-size: var(--fs-s); cursor: pointer; white-space: nowrap; }
   .btn svg { width: 14px; height: 14px; fill: none; stroke: var(--ink); stroke-width: 1.3; stroke-linejoin: round; }
 </style>

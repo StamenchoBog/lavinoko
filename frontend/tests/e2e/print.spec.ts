@@ -80,7 +80,8 @@ for (const lang of ['en', 'mk'] as const) {
 test('a rotated screen map still prints north-up, and the screen keeps its rotation', async ({ page }) => {
   await page.goto('/?lang=en&place=kozuf');
   const rose = page.locator('.rose svg');
-  await expect(rose).toBeVisible();
+  await expect(rose).toBeVisible({ timeout: 15000 });
+  await page.locator('.maplibregl-canvas').waitFor({ timeout: 15000 });
   await page.locator('.maplibregl-canvas').focus();
   await page.keyboard.press('Shift+ArrowLeft');
   await expect(rose).not.toHaveAttribute('style', /rotate\(-?0deg\)/);

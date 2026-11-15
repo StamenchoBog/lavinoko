@@ -2,7 +2,8 @@
   // The map. MapLibre is loaded only after the panel is on screen, so the forecast shows first.
   import { onMount } from 'svelte';
   import { base } from '#lib/paths.ts';
-  import type { FilterSpecification, Map as MlMap, Marker, StyleSpecification } from 'maplibre-gl';
+  import type { ExpressionSpecification, FilterSpecification, Map as MlMap, Marker, StyleSpecification } from 'maplibre-gl';
+  import type { Lang } from '#lib/types.ts';
   import { mapHandle, type GridLine, type MapPicture, type SnapshotRequest } from '#lib/mapHandle.ts';
   import { withTimeout, zoomForGroundWidth } from '#lib/printScale.ts';
   import { data, currentPlace, selectPlace, t, ui } from '#lib/state.svelte.ts';
@@ -73,6 +74,7 @@
         map = created;
         simplifyBaseMap(created!);
         addLayers();
+        setLabelLanguage(created!, ui.lang);
         addPlaceMarkers();
         mapHandle.snapshot = snapshot;
       });
@@ -190,7 +192,8 @@
           {
             id, type: 'raster', source: id,
             minzoom: scope === 'detail' ? meta.detail_zooms[0] : countryMin,
-            paint: { 'raster-opacity': name === 'slope' || name === 'aspect' ? 0.8 : 1, 'raster-fade-duration': 0 }
+            // Slope and aspect classes are terrain-scale information: faint at country zoom, full from zoom 11.
+            paint: { 'raster-opacity': name === 'slope' || name === 'aspect' ? ['interpolate', ['linear'], ['zoom'], 8, 0.3, 11, 0.8] : 1, 'raster-fade-duration': 0 }
           },
           firstLabel
         );
@@ -289,6 +292,31 @@
     });
   }
 
+  /**
+   * Map labels in the page language only: the base style prints Latin and Cyrillic together
+   * ("Skopje Скопје"). Macedonian: the Macedonian name, else the local one; English: the English
+   * or Latin name. Peaks and huts follow the same rule.
+   */
+  function labelName(lang: Lang): ExpressionSpecification {
+    return lang === 'mk'
+      ? ['coalesce', ['get', 'name:mk'], ['get', 'name']]
+      : ['coalesce', ['get', 'name:en'], ['get', 'name_en'], ['get', 'name:latin'], ['get', 'name']];
+  }
+  function setLabelLanguage(m: MlMap, lang: Lang) {
+    const name = labelName(lang);
+    for (const l of m.getStyle().layers) {
+      if (l.type !== 'symbol' || l.id.startsWith('outdoor-')) continue;
+      const tf = JSON.stringify(m.getLayoutProperty(l.id, 'text-field') ?? '');
+      if (tf.includes('name:nonlatin') || tf.includes('name_en') || tf.includes('"name:')) m.setLayoutProperty(l.id, 'text-field', name);
+    }
+    m.setLayoutProperty('outdoor-huts', 'text-field', ['concat', '⌂ ', ['coalesce', name, '']]);
+    m.setLayoutProperty('outdoor-peaks', 'text-field', ['concat', '▲ ', ['coalesce', name, ''], '\n', ['to-string', ['get', 'ele']], ' m']);
+  }
+  $effect(() => {
+    const lang = ui.lang;
+    if (map) setLabelLanguage(map, lang);
+  });
+
   /** Invisible padding left of a place symbol: with it the tap target is 48 px, and the symbol stays on the place. */
   const MARKER_PAD = 18;
 
@@ -323,6 +351,7 @@
       m.el.classList.toggle('attention', p.level === 'attention');
       m.el.classList.toggle('serious', p.level === 'serious');
       m.el.style.display = p.id === ui.place ? 'none' : '';
+      m.el.classList.toggle('hot', p.id === ui.hoverPlace);
     }
   });
 
@@ -442,14 +471,14 @@
   .n { fill: var(--serious); }
   .s { fill: #9aa6b2; }
   .lbl { font: 700 7.5px system-ui, sans-serif; fill: var(--muted); text-anchor: middle; dominant-baseline: middle; }
-  .lbl.strong { font-weight: 900; fill: var(--serious); }
+  .lbl.strong { font-weight: 700; fill: var(--serious); }
   @media (prefers-reduced-motion: reduce) { .rose svg { transition: none; } }
   @media print { .rose { display: none; } }
   :global(.wx-marker) {
     display: grid; place-items: center; min-height: 48px; padding: 0 4px; border: 0; background: none; cursor: pointer;
   }
   :global(.wx-marker span) {
-    border-radius: 12px; padding: 2px 8px; font: 700 12px system-ui, sans-serif;
+    border-radius: 12px; padding: 2px 8px; font: 700 var(--fs-xs) system-ui, sans-serif;
     white-space: nowrap; box-shadow: 0 1px 4px #0003; background: #fff; border: 2px solid var(--ink); color: var(--ink);
   }
   :global(.wx-marker.on span) { background: var(--glacier); border-color: var(--glacier); color: #fff; }
@@ -458,7 +487,7 @@
   :global(.place-marker) {
     display: flex; align-items: center; gap: 4px; border: 0; background: none; cursor: pointer;
     min-height: 48px; padding: 0 18px; /* 18 px = MARKER_PAD: a 48 px target around a 12 px symbol */
-    font: 700 12px system-ui, sans-serif; color: var(--ink); white-space: nowrap;
+    font: 700 var(--fs-xs) system-ui, sans-serif; color: var(--ink); white-space: nowrap;
   }
   :global(.place-marker i) {
     width: 12px; height: 12px; border-radius: 50%; background: var(--ink); border: 2px solid #fff; box-shadow: 0 0 0 1px #17283a55;
@@ -476,6 +505,10 @@
   :global(.place-marker.serious i) { background: var(--serious); }
   :global(.place-marker.attention i), :global(.place-marker.serious i) { width: 15px; height: 15px; }
   :global(.map.far .place-marker span) { display: none; }
+  /* The place pointed at in the list: on top, larger, and named at any zoom. */
+  :global(.place-marker.hot) { z-index: 3; }
+  :global(.map .place-marker.hot span) { display: inline; background: var(--ink); color: #fff; }
+  :global(.place-marker.hot i) { transform: scale(1.35); }
   @media (max-width: 560px) {
     :global(.maplibregl-ctrl-bottom-right) { display: none; }
   }

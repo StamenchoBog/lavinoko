@@ -89,6 +89,7 @@ jobs:
         run: ${{ matrix.run }}
 
   # One job per Playwright project. Each builds the site itself (playwright.config.ts webServer).
+  # "timing" depends on "e2e", so that job runs all browser tests: e2e first, then the timed offline ones.
   frontend-tests:
     name: frontend / tests (${{ matrix.project }})
     runs-on: ubuntu-latest
@@ -96,7 +97,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        project: [unit, e2e]
+        project: [unit, timing]
     defaults:
       run:
         working-directory: frontend
@@ -121,7 +122,7 @@ jobs:
         run: pnpm run test:data
       # The unit tests are plain Node and never open a page.
       - name: Install browser
-        if: matrix.project == 'e2e'
+        if: matrix.project != 'unit'
         run: pnpm exec playwright install --with-deps chromium
       - name: Playwright tests
         run: pnpm exec playwright test --project=${{ matrix.project }}

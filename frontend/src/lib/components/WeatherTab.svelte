@@ -4,7 +4,7 @@
   import { currentPlace, t, ui } from '#lib/state.svelte.ts';
   import Ladder from './Ladder.svelte';
   import Meteogram from './Meteogram.svelte';
-  import DayStrip from './place/DayStrip.svelte';
+  import SnowGauge from './place/SnowGauge.svelte';
   import Situation from './place/Situation.svelte';
   const s = $derived(t());
   const place = $derived(currentPlace());
@@ -19,11 +19,6 @@
 <div class="weather">
   <Situation />
 
-  <section aria-labelledby="days-h">
-    <h2 id="days-h">{s.sec_days} <small>{point.elevation} m</small></h2>
-    <DayStrip {point} />
-  </section>
-
   <section aria-labelledby="elev-h">
     <h2 id="elev-h">{s.sec_elev}</h2>
     <Ladder period="next72" />
@@ -34,6 +29,11 @@
   {#if place}<Meteogram placeId={place.id} pointId={point.id} />{/if}
     <p class="credit"><a href="https://open-meteo.com/" target="_blank" rel="noopener">{s.credit_weather}</a></p>
   </section>
+
+  <details>
+    <summary>{s.snow3_section}</summary>
+    <SnowGauge {point} />
+  </details>
 
   <details>
     <summary>{fill(s.days_title, { elev: point.elevation })}</summary>
@@ -77,16 +77,16 @@
   .weather { display: grid; gap: 22px; }
   .weather > :global(section) { display: grid; gap: 8px; }
   .weather > :global(details) { margin-top: -14px; }
-  h2 { font-size: 15px; margin: 0; display: flex; justify-content: space-between; align-items: baseline; }
-  h2 small { font-size: 12px; font-weight: 500; color: var(--muted); }
-  .credit { font-size: 12px; margin: 0 0 4px; }
-  .agree { display: block; font-style: normal; font-size: 12px; color: var(--muted); }
+  h2 { font-size: var(--fs-m); margin: 0; display: flex; justify-content: space-between; align-items: baseline; }
+  h2 small { font-size: var(--fs-xs); font-weight: 400; color: var(--muted); }
+  .credit { font-size: var(--fs-xs); margin: 0 0 4px; }
+  .agree { display: block; font-style: normal; font-size: var(--fs-xs); color: var(--muted); }
   .credit a { color: var(--muted); }
-  .days { width: 100%; border-collapse: collapse; font-size: 13.5px; font-variant-numeric: tabular-nums; }
-  .days th { font-weight: 500; color: var(--muted); font-size: 12px; text-align: right; padding: 2px 4px; }
+  .days { width: 100%; border-collapse: collapse; font-size: var(--fs-s); font-variant-numeric: tabular-nums; }
+  .days th { font-weight: 400; color: var(--muted); font-size: var(--fs-xs); text-align: right; padding: 2px 4px; }
   .days td { text-align: right; padding: 5px 4px; border-top: 1px solid var(--line); }
   .days th:first-child, .days td:first-child { text-align: left; white-space: nowrap; }
   .days tr.past td { color: var(--muted); }
   .days tr.today td { font-weight: 700; }
-  .days td.snow { color: var(--glacier); font-weight: 650; }
+  .days td.snow { color: var(--glacier); font-weight: 600; }
 </style>

@@ -16,6 +16,7 @@
     return period === 'next72' && lo != null && hi != null ? { lo, hi } : null;
   });
   const s = $derived(t());
+  const cols = $derived(period === 'next72' ? 5 : 4);
 
   function select(p: WeatherPoint) {
     ui.point = p.id;
@@ -25,13 +26,17 @@
 <table>
   {#if caption}<caption>{caption}</caption>{/if}
   <thead>
-    <tr><th><span class="sr-only">{s.col_point}</span></th><th>{s.col_snow}</th><th>{s.col_wind}</th><th>{s.col_temp}</th></tr>
+    <tr>
+      <th><span class="sr-only">{s.col_point}</span></th>
+      <th>{s.col_snow}</th>{#if period === 'next72'}<th>{s.col_last24}</th>{/if}
+      <th>{s.col_wind}</th><th>{s.col_temp}</th>
+    </tr>
   </thead>
   <tbody>
     {#each points as p, i (p.id)}
       {@const d = p[period]}
       {#if fl && fl.lo > p.elevation && (i === 0 || fl.lo <= (points[i - 1]?.elevation ?? Infinity))}
-        <tr class="fl" aria-hidden="true"><td colspan="4"><span>{fill(s.fl_row, { lo: num(fl.lo), hi: num(fl.hi) })}</span></td></tr>
+        <tr class="fl" aria-hidden="true"><td colspan={cols}><span>{fill(s.fl_row, { lo: num(fl.lo), hi: num(fl.hi) })}</span></td></tr>
       {/if}
       {@const rng = p.spread ? (period === 'next72' ? p.spread.snow_next72_cm : p.spread.snow_past72_cm) : null}
       <tr
@@ -45,6 +50,7 @@
           <span class="snow" class:zero={!d.snow_cm}>{num(d.snow_cm)}<small>&nbsp;cm</small></span>
           {#if rng && rng[1] - rng[0] >= 1}<span class="range">{fill(s.range_models, { lo: num(rng[0]), hi: num(rng[1]) })}</span>{/if}
         </td>
+        {#if period === 'next72'}<td class="last">{num(p.past72.snow_24h_cm)}<small>&nbsp;cm</small></td>{/if}
         <td class="wind">
           <WindArrow from={d.wind.from} size={14} />
           {num(d.wind.max_kmh)} <small>{d.wind.from ? d.wind.from : ''}</small>
@@ -53,33 +59,36 @@
       </tr>
     {/each}
     {#if fl && fl.lo <= (points.at(-1)?.elevation ?? -Infinity)}
-      <tr class="fl" aria-hidden="true"><td colspan="4"><span>{fill(s.fl_row, { lo: num(fl.lo), hi: num(fl.hi) })}</span></td></tr>
+      <tr class="fl" aria-hidden="true"><td colspan={cols}><span>{fill(s.fl_row, { lo: num(fl.lo), hi: num(fl.hi) })}</span></td></tr>
     {/if}
   </tbody>
 </table>
 
 <style>
   table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-  caption { text-align: left; font-size: 13px; color: var(--muted); padding-bottom: 4px; }
-  th { font-size: 12px; font-weight: 500; color: var(--muted); text-align: right; padding: 0 0 4px; }
+  caption { text-align: left; font-size: var(--fs-s); color: var(--muted); padding-bottom: 4px; }
+  th { font-size: var(--fs-xs); font-weight: 400; color: var(--muted); text-align: right; padding: 0 0 4px; }
   th:first-child { text-align: left; }
   tbody tr { cursor: pointer; }
-  td { padding: 9px 0; border-top: 1px solid var(--line); text-align: right; vertical-align: middle; }
+  td { padding: 9px 0 9px 10px; border-top: 1px solid var(--line); text-align: right; vertical-align: middle; }
+  th { padding-left: 10px; }
   td:last-child { padding-right: 8px; }
   td.where { text-align: left; padding-left: 9px; border-left: 3px solid transparent; }
   tr[aria-selected='true'] td { background: var(--tint); }
   tr[aria-selected='true'] td.where { border-left-color: var(--glacier); }
-  .elev { font-weight: 700; font-size: 16px; display: block; line-height: 1.1; }
-  .name { font-size: 12.5px; color: var(--muted); }
-  .snow { font-size: 20px; font-weight: 750; color: var(--glacier); }
+  .elev { font-weight: 700; font-size: var(--fs-m); display: block; line-height: 1.1; }
+  .name { font-size: var(--fs-xs); color: var(--muted); display: block; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .snow { font-size: var(--fs-l); font-weight: 700; color: var(--glacier); }
   .snow.zero { color: var(--muted); font-weight: 600; }
-  .snow small { font-size: 12px; font-weight: 500; }
-  .range { display: block; font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .snow small { font-size: var(--fs-xs); font-weight: 400; }
+  .range { display: block; font-size: var(--fs-xs); color: var(--muted); white-space: nowrap; }
   .wind { white-space: nowrap; font-weight: 600; }
-  .wind small { color: var(--muted); font-weight: 500; }
+  .wind small { color: var(--muted); font-weight: 400; }
   .temp { white-space: nowrap; }
+  .last { white-space: nowrap; color: var(--muted); }
+  .last small { font-size: var(--fs-xs); }
   tr.fl td { padding: 0; border-top: 0; text-align: left; }
-  tr.fl span { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; color: var(--glacier); }
+  tr.fl span { display: flex; align-items: center; gap: 6px; font-size: var(--fs-xs); font-weight: 700; color: var(--glacier); }
   tr.fl span::before, tr.fl span::after { content: ''; flex: 1; border-top: 1.5px dashed var(--glacier); }
   tr.fl span::before { flex: 0 0 9px; }
 </style>

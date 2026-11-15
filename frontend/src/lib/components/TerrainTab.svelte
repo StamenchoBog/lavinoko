@@ -52,23 +52,24 @@
 
 <style>
   .seg { display: inline-flex; background: #e8edf2; border-radius: 8px; padding: 3px; margin-bottom: 10px; }
-  .seg button { border: 0; background: none; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--muted); }
+  .seg button { border: 0; background: none; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: var(--fs-s); font-weight: 600; color: var(--muted); }
   .seg button[aria-pressed='true'] { background: #fff; color: var(--ink); box-shadow: 0 1px 2px #17283a26; }
-  .scale { display: flex; font-size: 12px; font-weight: 650; color: var(--ink); }
+  .scale { display: flex; font-size: var(--fs-xs); font-weight: 600; color: var(--ink); }
   .scale span { flex: 1; display: grid; gap: 4px; text-align: center; }
   .scale i { height: 14px; }
   .scale span:first-child i { border-radius: 6px 0 0 6px; }
   .scale span:last-child i { border-radius: 0 6px 6px 0; }
-  .compass { display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; font-size: 12px; font-weight: 650; color: var(--ink); }
+  .compass { display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; font-size: var(--fs-xs); font-weight: 600; color: var(--ink); }
   .compass span { display: grid; gap: 4px; text-align: center; }
   .compass i { height: 14px; border-radius: 4px; }
-  .draft { margin: 0 0 10px; padding: 8px 10px; border-radius: 8px; background: var(--serious-bg); color: var(--serious); font-size: 13px; font-weight: 600; }
-  .ates { display: grid; gap: 6px; font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+  .draft { margin: 0 0 10px; padding: 8px 10px; border-radius: 8px; background: var(--serious-bg); color: var(--serious); font-size: var(--fs-s); font-weight: 600; }
+  .ates { display: grid; gap: 6px; font-size: var(--fs-s); font-weight: 600; margin-bottom: 10px; }
   .ates span { display: flex; align-items: center; gap: 8px; }
   .ates i { width: 22px; height: 14px; border-radius: 3px; box-shadow: 0 0 0 1px #17283a33; }
-  .hint { font-size: 13px; color: var(--muted); margin: 8px 0 10px; }
-  .toggle { display: flex; align-items: center; gap: 8px; font-size: 14px; padding: 6px 0 10px; cursor: pointer; }
-  .kv { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; }
+  .hint { font-size: var(--fs-s); color: var(--muted); margin: 8px 0 10px; }
+  .toggle { display: flex; align-items: center; gap: 8px; font-size: var(--fs-s); padding: 6px 0 10px; cursor: pointer; }
+  .toggle input { accent-color: var(--glacier); width: 18px; height: 18px; margin: 0; }
+  .kv { display: flex; justify-content: space-between; font-size: var(--fs-s); padding: 4px 0; }
   /* Touch screens (gloves): at least 48 px targets. */
   @media (pointer: coarse) {
     .seg button { min-height: 48px; }

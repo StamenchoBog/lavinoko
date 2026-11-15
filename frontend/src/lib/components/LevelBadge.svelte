@@ -21,7 +21,7 @@
 {/if}
 
 <style>
-  .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; font-size: var(--fs-xs); font-weight: 700; white-space: nowrap; }
   .badge svg { width: 15px; height: 15px; flex: none; }
   .attention { color: var(--attention-ink); }
   .attention svg { color: var(--signal); }

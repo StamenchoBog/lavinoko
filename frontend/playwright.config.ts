@@ -15,7 +15,10 @@ export default defineConfig({
   },
   projects: [
     { name: 'unit', testMatch: /unit\/.*\.test\.ts/ },
-    { name: 'e2e', testMatch: /e2e\/.*\.spec\.ts/, use: { ...devices['Pixel 7'] } }
+    { name: 'e2e', testMatch: /e2e\/.*\.spec\.ts/, testIgnore: /offline\.spec\.ts/, use: { ...devices['Pixel 7'] } },
+    // The offline tests measure real time (the saved forecast within 4 s). They run after the others,
+    // on a quiet machine, so a busy CPU can't make them fail. `--project=timing` runs e2e first.
+    { name: 'timing', testMatch: /e2e\/offline\.spec\.ts/, dependencies: ['e2e'], use: { ...devices['Pixel 7'] } }
   ],
   webServer: {
     command: 'pnpm run build && pnpm run preview --port 4173 --strictPort',

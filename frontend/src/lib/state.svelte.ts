@@ -22,6 +22,7 @@ export const ui = $state({
   contours: true,
   inspect: null as { lat: number; lon: number } | null, // tapped map point (point inspector)
   place: null as string | null, // selected place id; null = country overview
+  hoverPlace: null as string | null, // place pointed at in the list: highlighted on the map
   point: null as string | null, // selected forecast point within the place
   error: false,
   highContrast: false, // bright-snow mode: full ink on pure white

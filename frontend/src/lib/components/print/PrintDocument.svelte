@@ -6,7 +6,7 @@
   import { onMount } from 'svelte';
   import { asset } from '$app/paths';
   import { base } from '#lib/paths.ts';
-  import { byHeight, COMPASS_DEG, dayLabel, nextIssue, num, skopjeTime } from '#lib/format.ts';
+  import { byHeight, COMPASS_DEG, dayLabel, nextIssue, num, skopjeTime, snowFree } from '#lib/format.ts';
   import { fill } from '#lib/i18n.ts';
   import { resetAfterPrint } from '#lib/printing.ts';
   import { currentPlace, data, print, t, ui } from '#lib/state.svelte.ts';
@@ -103,7 +103,7 @@
             <span class="concern"><LevelBadge level={f.level} />{s.concern[f.code]}{#if f.agree}<small>{fill(s.agree, { n: f.agree, m: f.models })}</small>{/if}</span>
           {/each}
         {:else}
-          <span>{s.summary_calm}</span>
+          <span>{points.every(snowFree) ? s.prob.snowfree.name : s.summary_calm}</span>
         {/if}
       </div>
     {/if}

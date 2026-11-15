@@ -211,7 +211,7 @@
   .dot { fill: var(--ink); stroke: var(--snow); stroke-width: 2; }
   .tip {
     position: absolute; top: 0; width: 140px; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #17283a33;
-    padding: 6px 9px; font-size: 12.5px; display: grid; gap: 1px; pointer-events: none; font-variant-numeric: tabular-nums;
+    padding: 6px 9px; font-size: var(--fs-xs); display: grid; gap: 1px; pointer-events: none; font-variant-numeric: tabular-nums;
   }
   .sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 5px; }
   .sw.snow { background: var(--glacier); }

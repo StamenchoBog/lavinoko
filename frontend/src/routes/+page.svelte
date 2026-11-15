@@ -209,6 +209,12 @@
     --serious: #8c1610;   /* serious weather (always with symbol + word; ≥ 7:1) */
     --serious-bg: #fbe9e7;
     --rain: #1f9e89;      /* rain bars */
+    /* One type scale (as the printed sheet): five sizes, weights 400 / 600 / 700. */
+    --fs-xs: 12px;        /* labels, units, notes */
+    --fs-s: 13px;         /* secondary text */
+    --fs-m: 15px;         /* body */
+    --fs-l: 17px;         /* headings, key figures */
+    --fs-xl: 22px;        /* the page title */
   }
   /* High contrast for bright snow: pure white ground, no greys, darker rules, heavier text. */
   :global(:root[data-contrast='high']) {
@@ -218,20 +224,21 @@
     --line: #5b6773;
     --tint: #dcebfa;
   }
-  :global(:root[data-contrast='high'] body) { font-weight: 500; }
+  :global(:root[data-contrast='high'] body) { font-weight: 400; }
   :global(*) { box-sizing: border-box; }
   :global(html), :global(body) { margin: 0; height: 100%; }
-  :global(body) { font: 15px/1.4 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: var(--ink); background: #dfe5ea; }
+  :global(body) { font: var(--fs-m)/1.4 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: var(--ink); background: #dfe5ea; }
   :global(button) { font: inherit; color: inherit; }
   :global(:focus-visible) { outline: 2px solid var(--glacier); outline-offset: 2px; }
   :global(details) { border-top: 1px solid var(--line); }
   :global(details:first-of-type) { margin-top: 10px; }
-  :global(summary) { cursor: pointer; padding: 10px 0; font-weight: 600; font-size: 14px; list-style: none; display: flex; justify-content: space-between; }
+  :global(summary) { cursor: pointer; padding: 10px 0; font-weight: 600; font-size: var(--fs-s); list-style: none; display: flex; justify-content: space-between; }
   :global(summary::-webkit-details-marker) { display: none; }
   :global(summary::after) { content: '+'; color: var(--muted); font-weight: 400; }
   :global(details[open] summary::after) { content: '–'; }
   :global(details > :not(summary)) { margin: 0 0 12px; }
-  :global(.small) { font-size: 13px; color: var(--muted); }
+  :global(.small) { font-size: var(--fs-s); color: var(--muted); }
+  :global(small) { font-size: var(--fs-xs); }
   :global(.sr-only) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   /* Touch screens (gloves): at least 48 px targets. */
   @media (pointer: coarse) {
@@ -255,13 +262,13 @@
   .top { display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
   .brand { display: flex; align-items: center; gap: 8px; border: 0; background: none; padding: 0; cursor: pointer; text-align: left; }
   .brand img { display: block; }
-  .brand b { display: block; font-size: 16px; letter-spacing: 0.01em; line-height: 1.1; }
-  .brand small { display: block; font-size: 11.5px; color: var(--muted); }
+  .brand b { display: block; font-size: var(--fs-m); letter-spacing: 0.01em; line-height: 1.1; }
+  .brand small { display: block; font-size: var(--fs-xs); color: var(--muted); }
   .nav { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding-top: 8px; }
-  .back { border: 0; background: none; padding: 0; cursor: pointer; color: var(--glacier); font-size: 14px; font-weight: 600; white-space: nowrap; }
-  h1 { font-size: 22px; line-height: 1.15; margin: 6px 0 0; font-weight: 750; letter-spacing: -0.01em; }
+  .back { border: 0; background: none; padding: 0; cursor: pointer; color: var(--glacier); font-size: var(--fs-s); font-weight: 600; white-space: nowrap; }
+  h1 { font-size: var(--fs-xl); line-height: 1.15; margin: 6px 0 0; font-weight: 700; letter-spacing: -0.01em; }
   .actions { display: flex; gap: 6px; }
-  .follow { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 3px 10px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+  .follow { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 3px 10px; font-size: var(--fs-s); cursor: pointer; white-space: nowrap; }
   .follow svg { width: 14px; height: 14px; fill: none; stroke: var(--ink); stroke-width: 1.4; }
   .follow[aria-pressed='true'] { background: var(--ink); color: #fff; border-color: var(--ink); }
   .follow[aria-pressed='true'] svg { fill: #fff; stroke: #fff; }
@@ -269,15 +276,15 @@
   .sun { display: grid; place-items: center; border: 0; background: none; padding: 4px; border-radius: 8px; cursor: pointer; color: var(--muted); }
   .sun svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
   .sun[aria-pressed='true'] { background: var(--ink); color: #fff; }
-  .lang { display: flex; font-size: 13px; }
+  .lang { display: flex; font-size: var(--fs-s); }
   .lang button { border: 0; background: none; padding: 4px 6px; cursor: pointer; color: var(--muted); }
   .lang button[aria-pressed='true'] { color: var(--ink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
-  .updated { font-size: 12.5px; color: var(--muted); margin: 6px 0 12px; min-height: 2.8em; }
+  .updated { font-size: var(--fs-xs); color: var(--muted); margin: 6px 0 12px; min-height: 2.8em; }
   .updated b { display: block; font-weight: 600; color: var(--ink); }
 
-  .notice { margin: 0; padding: 8px 12px; border-radius: 10px; font-size: 13px; font-weight: 600; box-shadow: 0 2px 10px #17283a33; }
-  .notice.offline { background: #eef1f4; color: var(--ink); }
-  .notice.stale { background: var(--serious-bg); color: var(--serious); }
+  /* Flat, like the panel: one line of text with a rule that says how much it matters. */
+  .notice { margin: 0; padding: 8px 12px; border-radius: 12px; border-left: 4px solid var(--muted); background: var(--snow); color: var(--ink); font-size: var(--fs-s); font-weight: 400; box-shadow: 0 2px 10px #17283a33; }
+  .notice.stale { border-left-color: var(--serious); color: var(--serious); font-weight: 600; }
 
   /* Print: a place prints its own A4 document (PrintDocument); the overview prints the panel. */
   @media print {
@@ -292,7 +299,7 @@
     .panel { overflow: visible; box-shadow: none; padding: 12mm; border-radius: 0; }
   }
   .tabs { display: flex; gap: 18px; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
-  .tabs button { border: 0; background: none; padding: 0 0 8px; cursor: pointer; font-weight: 650; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tabs button { border: 0; background: none; padding: 0 0 8px; cursor: pointer; font-weight: 600; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
   .tabs button[aria-selected='true'] { color: var(--ink); border-color: var(--ink); }
 
   /* Phone: panel and point card are bottom sheets, so the notices go to the top of the screen,

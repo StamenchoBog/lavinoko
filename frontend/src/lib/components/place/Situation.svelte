@@ -3,7 +3,7 @@
   // create (after SLF "Caution Avalanches!", 2026): what, how long it lasts, where, what to look for.
   // Cards are named after the weather, never the avalanche problem, and nothing here may read as
   // "safe": this is not a danger rating, and old weak layers can't be judged from weather.
-  import { byHeight, num } from '#lib/format.ts';
+  import { byHeight, snowFree } from '#lib/format.ts';
   import { fill, type Problem } from '#lib/i18n.ts';
   import { currentPlace, t } from '#lib/state.svelte.ts';
   import type { Compass, Flag, FlagCode } from '#lib/types.ts';
@@ -22,6 +22,7 @@
   const place = $derived(currentPlace());
   const pts = $derived(place ? byHeight(place.points) : []);
   const top = $derived(pts[0]);
+  const calm = $derived(pts.length && pts.every(snowFree) ? 'snowfree' : 'favourable');
 
   // One card per problem: its most severe flag, the flags behind it, and the lowest elevation affected.
   const problems = $derived.by(() => {
@@ -50,10 +51,6 @@
     return [ORDER[(i + 7) % 8]!, c, ORDER[(i + 1) % 8]!];
   };
 
-  // New snow over the past 3 days plus the next 3, against the leaflet's critical amounts.
-  const snow3 = $derived(top ? top.past72.snow_cm + top.next72.snow_cm : 0);
-  const SCALE = 60;
-  const pct = (cm: number) => Math.min(100, (cm / SCALE) * 100);
 </script>
 
 {#snippet icon(key: string)}
@@ -95,33 +92,24 @@
       <article class="card calm">
         <div class="summary-row">
           <span class="icon" aria-hidden="true">{@render icon('favourable')}</span>
-          <span class="head"><span class="title"><b>{s.prob.favourable.name}</b></span></span>
+          <span class="head">
+            <span class="title"><b>{s.prob[calm].name}</b></span>
+            <span class="meta">{s.prob[calm].short}</span>
+          </span>
         </div>
-        <p class="why">{s.prob.favourable.why}</p>
+        <details class="more">
+          <summary>{s.why_label}</summary>
+          <p class="why">{s.prob[calm].why}</p>
+        </details>
       </article>
     {/each}
 
-    <div class="gauge" aria-label={fill(s.snow3_aria, { cm: num(snow3) })}>
-      <div class="glabel"><b>{s.snow3_title}</b><span>{num(snow3)} cm</span></div>
-      <div class="bar">
-        <span class="zone z1" style="left: {pct(10)}%; width: {pct(20) - pct(10)}%"></span>
-        <span class="zone z2" style="left: {pct(20)}%; width: {pct(30) - pct(20)}%"></span>
-        <span class="zone z3" style="left: {pct(30)}%; width: {pct(50) - pct(30)}%"></span>
-        <span class="fill" style="width: {pct(snow3)}%"></span>
-      </div>
-      <div class="ticks">{#each [0, 10, 20, 30, 50] as v (v)}<span style="left: {pct(v)}%">{v}</span>{/each}</div>
-      <p class="small">{s.snow3_note}</p>
-    </div>
-
-    <p class="overnight"><b>{s.overnight}:</b> {fill(s.overnight_line, {
-      snow: num(top.past12.snow_cm), wind: num(top.past12.wind.max_kmh), from: top.past12.wind.from ?? '', temp: num(top.past12.temp_min_c)
-    })} <span>({top.elevation} m)</span></p>
   </section>
 {/if}
 
 <style>
   section { display: grid; gap: 8px; }
-  h2 { font-size: 15px; margin: 0; }
+  h2 { font-size: var(--fs-m); margin: 0; }
   .card { border-radius: 10px; padding: 10px 12px; display: grid; gap: 6px; border: 1px solid var(--line); background: #fff; }
   details.card { border-top: 1px solid var(--line); }
   details.card[open] { gap: 8px; }
@@ -134,23 +122,15 @@
   details:not([open]) summary { opacity: 0.95; }
   .icon { flex: none; width: 34px; height: 34px; border-radius: 8px; background: #fff; display: grid; place-items: center; box-shadow: 0 0 0 1px #17283a1a; }
   .icon :global(svg) { width: 20px; height: 20px; fill: none; stroke: var(--ink); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-  .facts { margin: 0; padding-left: 18px; font-size: 13.5px; font-weight: 600; }
+  .facts { margin: 0; padding-left: 18px; font-size: var(--fs-s); font-weight: 600; }
   .head { display: grid; gap: 1px; min-width: 0; }
-  .title { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 15.5px; line-height: 1.25; }
-  .meta { font-size: 12px; color: var(--muted); }
-  .fact { font-size: 13px; font-weight: 600; margin-top: 2px; }
-  .where, .why, .look { margin: 0; font-size: 13.5px; }
+  .title { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: var(--fs-m); line-height: 1.25; }
+  .meta { font-size: var(--fs-xs); color: var(--muted); }
+  .fact { font-size: var(--fs-s); font-weight: 600; margin-top: 2px; }
+  .where, .why, .look { margin: 0; font-size: var(--fs-s); }
   .look { color: var(--ink); }
-  .gauge { padding: 4px 2px 0; }
-  .glabel { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
-  .glabel span { font-weight: 800; color: var(--glacier); }
-  .bar { position: relative; height: 10px; border-radius: 5px; background: #e8edf2; overflow: hidden; }
-  .zone { position: absolute; top: 0; bottom: 0; }
-  .z1 { background: #f6e3a8; } .z2 { background: #f2c27a; } .z3 { background: #ea9a7a; }
-  .fill { position: absolute; left: 0; top: 3px; bottom: 3px; background: var(--glacier); border-radius: 3px; }
-  .ticks { position: relative; height: 14px; font-size: 10.5px; color: var(--muted); }
-  .ticks span { position: absolute; transform: translateX(-50%); }
-  .ticks span:first-child { transform: none; }
-  .overnight { margin: 0; font-size: 13px; padding-top: 8px; border-top: 1px solid var(--line); }
-  .overnight span { color: var(--muted); }
+  .more { border-top: 0; margin: 0; }
+  .more summary { font-size: var(--fs-s); font-weight: 400; color: var(--glacier); cursor: pointer; padding: 4px 0 0; }
+  .more summary::after { content: none; }
+  .more .why { margin-top: 4px; }
 </style>

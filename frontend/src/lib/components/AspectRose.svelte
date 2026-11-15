@@ -34,7 +34,7 @@
   path { fill: #fff; stroke: #9aa6b2; stroke-width: 1; }
   path.on { fill: var(--ink); }
   text { font-size: 7px; font-weight: 700; fill: var(--ink); paint-order: stroke; stroke: #fff; stroke-width: 2px; }
-  figcaption { display: grid; font-size: 13px; line-height: 1.3; }
-  figcaption b { font-size: 14px; }
+  figcaption { display: grid; font-size: var(--fs-s); line-height: 1.3; }
+  figcaption b { font-size: var(--fs-s); }
   figcaption span { color: var(--muted); }
 </style>

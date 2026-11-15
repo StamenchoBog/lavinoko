@@ -49,6 +49,7 @@ test('slow connection: the saved forecast shows within 4 s instead of waiting fo
   await expect(page.locator('.updated')).toContainText('Issued', { timeout: 4_000 });
   expect(Date.now() - t0).toBeLessThan(4_000);
   expect(held, 'the slow route must have been hit, or this test proves nothing').toBeGreaterThan(0);
+  await context.unrouteAll({ behavior: 'ignoreErrors' });
 });
 
 test('a forecast that missed its scheduled update is flagged, and replaced when the late network answers', async ({ page, context }) => {
@@ -67,7 +68,7 @@ test('a forecast that missed its scheduled update is flagged, and replaced when 
   });
   await page.reload({ waitUntil: 'commit' });
 
-  const notice = page.getByRole('status').filter({ hasText: 'newer forecast' });
+  const notice = page.getByRole('status').filter({ hasText: 'is overdue' });
   await expect(notice).toBeVisible({ timeout: 4_000 });
   await expect(notice).toBeHidden({ timeout: 10_000 });
   // Later requests may still be waiting in the slow route: drop them, or they fail the next test.

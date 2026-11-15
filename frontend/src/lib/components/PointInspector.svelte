@@ -102,29 +102,29 @@
 <style>
   .card {
     position: absolute; z-index: 3; right: 64px; top: 12px; width: 320px; max-height: calc(100% - 24px); overflow: auto;
-    background: var(--snow); border-radius: 12px; box-shadow: 0 2px 10px #17283a33; padding: 12px 14px; font-size: 13.5px;
+    background: var(--snow); border-radius: 12px; box-shadow: 0 2px 10px #17283a33; padding: 12px 14px; font-size: var(--fs-s);
   }
   header { display: flex; justify-content: space-between; align-items: center; }
-  .x { border: 0; background: none; font-size: 22px; line-height: 1; cursor: pointer; padding: 0 4px; color: var(--muted); }
-  .coord { font: 800 18px/1.2 system-ui, sans-serif; margin: 6px 0 0; font-variant-numeric: tabular-nums; }
-  .dms { margin: 1px 0 6px; color: var(--muted); font-size: 12.5px; }
-  .copy { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 4px 12px; font-size: 12.5px; cursor: pointer; }
+  .x { border: 0; background: none; font-size: var(--fs-xl); line-height: 1; cursor: pointer; padding: 0 4px; color: var(--muted); }
+  .coord { font: 700 var(--fs-l)/1.2 system-ui, sans-serif; margin: 6px 0 0; font-variant-numeric: tabular-nums; }
+  .dms { margin: 1px 0 6px; color: var(--muted); font-size: var(--fs-xs); }
+  .copy { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 4px 12px; font-size: var(--fs-xs); cursor: pointer; }
   .terrain { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 10px 0 4px; }
   .terrain span { display: grid; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; }
-  .terrain small { font-size: 11px; color: var(--muted); }
-  .terrain b { font-size: 16px; }
+  .terrain small { font-size: var(--fs-xs); color: var(--muted); }
+  .terrain b { font-size: var(--fs-m); }
   .terrain .steep { border-color: var(--serious); }
-  .warn { margin: 4px 0; padding: 5px 8px; border-radius: 7px; background: var(--serious-bg); color: var(--serious); font-weight: 600; font-size: 12.5px; }
-  h3 { font-size: 13px; margin: 10px 0 4px; }
-  table { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
-  th { font-weight: 500; color: var(--muted); font-size: 11px; text-align: right; padding: 0 3px 3px; }
+  .warn { margin: 4px 0; padding: 5px 8px; border-radius: 7px; background: var(--serious-bg); color: var(--serious); font-weight: 600; font-size: var(--fs-xs); }
+  h3 { font-size: var(--fs-s); margin: 10px 0 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: var(--fs-xs); font-variant-numeric: tabular-nums; }
+  th { font-weight: 400; color: var(--muted); font-size: var(--fs-xs); text-align: right; padding: 0 3px 3px; }
   td { text-align: right; padding: 3px; border-top: 1px solid var(--line); white-space: nowrap; }
   th:first-child, td:first-child { text-align: left; }
   td.low { color: var(--serious); font-weight: 700; }
   /* Touch screens (gloves): at least 48 px targets. */
   @media (pointer: coarse) {
     .x { min-width: 48px; min-height: 48px; margin: -8px -8px -8px 0; }
-    .copy { min-height: 48px; padding: 4px 16px; font-size: 14px; }
+    .copy { min-height: 48px; padding: 4px 16px; font-size: var(--fs-s); }
   }
   @media (max-width: 560px) {
     .card { left: 0; right: 0; bottom: 0; top: auto; width: auto; max-height: 55%; border-radius: 14px 14px 0 0; }

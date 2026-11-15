@@ -25,11 +25,11 @@
 
 <style>
   ul { list-style: none; padding: 0; margin: 0 0 8px; }
-  li { display: grid; gap: 1px; padding: 6px 0; border-top: 1px dotted var(--line); font-size: 13px; }
+  li { display: grid; gap: 1px; padding: 6px 0; border-top: 1px dotted var(--line); font-size: var(--fs-s); }
   li:first-child { border-top: 0; }
   a { color: var(--glacier); font-weight: 600; }
   .small a { font-weight: 400; }
-  .credit { font-size: 12px; }
+  .credit { font-size: var(--fs-xs); }
   /* Touch screens (gloves): the source's name link is a 48 px target. */
   @media (pointer: coarse) {
     li > a { display: flex; align-items: center; min-height: 48px; }

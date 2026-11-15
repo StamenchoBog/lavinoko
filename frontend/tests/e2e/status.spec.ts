@@ -22,7 +22,7 @@ async function expectUncovered(notice: Locator) {
   expect(onTop, 'something covers the notice').toBe(true);
 }
 
-const notice = (page: Page) => page.getByRole('status').filter({ hasText: 'newer forecast' });
+const notice = (page: Page) => page.getByRole('status').filter({ hasText: 'is overdue' });
 
 test.describe('phone', () => {
   test('the notice stays on screen while a point on the map is open', async ({ page }) => {

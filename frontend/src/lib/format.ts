@@ -81,3 +81,14 @@ export function dayLabel(date: string, weekdays: string[]): string {
 export const COMPASS_DEG: Record<Compass, number> = { N: 0, NE: 45, E: 90, SE: 135, S: 180, SW: 225, W: 270, NW: 315 };
 
 export const byHeight = (pts: WeatherPoint[]) => [...pts].sort((a, b) => b.elevation - a.elevation);
+
+/**
+ * No snow on the ground (model), none in the last 72 h and none forecast in the next 72 h. Then there
+ * is nothing for wind, rain or warming to act on, and the weather alerts stay silent by design; the
+ * page says so instead of "nothing notable", which would read as calm weather on a stormy ridge.
+ */
+export const snowFree = (p: WeatherPoint): boolean =>
+  p.now.model_snow_depth_cm === 0 && p.past72.snow_cm === 0 && p.next72.snow_cm === 0;
+
+/** Ridge wind that moves snow and is hard going on a ridge: the backend's strong-wind threshold (T["strong_wind_kmh"]). */
+export const STRONG_WIND_KMH = 50;
