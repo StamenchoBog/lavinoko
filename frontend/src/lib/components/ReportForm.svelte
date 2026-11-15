@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { COMPASS_DEG } from '$lib/format';
-  import { fill } from '$lib/i18n';
-  import { KINDS, preparePhoto, store, type Kind } from '$lib/reports';
-  import { data, t, ui } from '$lib/state.svelte';
-  import type { Compass } from '$lib/types';
+  import { COMPASS_DEG } from '#lib/format.ts';
+  import { fill } from '#lib/i18n.ts';
+  import { KINDS, preparePhoto, store, type Kind } from '#lib/reports.ts';
+  import { data, t, ui } from '#lib/state.svelte.ts';
+  import type { Compass } from '#lib/types.ts';
 
   let { onDone }: { onDone: (saved: boolean) => void } = $props();
   const s = $derived(t());

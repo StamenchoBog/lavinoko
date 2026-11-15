@@ -2,12 +2,13 @@
   // The printed document for a place. Exactly one A4 page (tour sheet) or two (plus detailed
   // forecast); every page is a fixed 210 × 297 mm box, so content never spills onto extra pages.
   import { onMount } from 'svelte';
-  import { base } from '$app/paths';
-  import { byHeight, COMPASS_DEG, dayLabel, nextIssue, num, skopjeTime } from '$lib/format';
-  import { fill } from '$lib/i18n';
-  import { resetAfterPrint } from '$lib/printing';
-  import { currentPlace, data, print, t, ui } from '$lib/state.svelte';
-  import type { Compass, Flag } from '$lib/types';
+  import { asset } from '$app/paths';
+  import { base } from '#lib/paths.ts';
+  import { byHeight, COMPASS_DEG, dayLabel, nextIssue, num, skopjeTime } from '#lib/format.ts';
+  import { fill } from '#lib/i18n.ts';
+  import { resetAfterPrint } from '#lib/printing.ts';
+  import { currentPlace, data, print, t, ui } from '#lib/state.svelte.ts';
+  import type { Compass, Flag } from '#lib/types.ts';
   import LevelBadge from '../LevelBadge.svelte';
   import PrintChart from './PrintChart.svelte';
   import PrintMap from './PrintMap.svelte';
@@ -75,7 +76,7 @@
 {#snippet header(page: number, title: string, compact: boolean)}
   <header class:compact>
     <div class="brandrow">
-      <span class="brand"><img src="{base}/logo.png" alt="" />{s.brand}</span>
+      <span class="brand"><img src={asset('logo.png')} alt="" />{s.brand}</span>
       <span class="doc">{title}<span class="pg">{page}/{pages}</span></span>
     </div>
     <div class="titlerow">

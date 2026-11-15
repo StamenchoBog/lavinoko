@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { fill } from '$lib/i18n';
-  import { data, t, ui } from '$lib/state.svelte';
+  import { fill } from '#lib/i18n.ts';
+  import { data, t, ui } from '#lib/state.svelte.ts';
 
   const s = $derived(t());
   const m = $derived(data.meta);

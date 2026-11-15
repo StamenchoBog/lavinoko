@@ -1,8 +1,8 @@
 <script lang="ts">
   // Hour-by-hour forecast for paper: last 24 h + next 72 h, stacked panels on one time axis,
   // one scale per panel. Units are millimetres (viewBox), so it prints at a fixed, crisp size.
-  import { t } from '$lib/state.svelte';
-  import type { HourlyPoint } from '$lib/types';
+  import { t } from '#lib/state.svelte.ts';
+  import type { HourlyPoint } from '#lib/types.ts';
 
   let { h }: { h: HourlyPoint } = $props();
   const s = $derived(t());

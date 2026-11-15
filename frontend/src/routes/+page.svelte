@@ -1,20 +1,21 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte';
-  import { base } from '$app/paths';
-  import MapView from '$lib/components/MapView.svelte';
-  import Overview from '$lib/components/Overview.svelte';
-  import ReportsTab from '$lib/components/ReportsTab.svelte';
-  import { REPORTS_ENABLED, store } from '$lib/reports';
-  import SourcesPanel from '$lib/components/SourcesPanel.svelte';
-  import PrintButton from '$lib/components/PrintButton.svelte';
-  import PointInspector from '$lib/components/PointInspector.svelte';
-  import TerrainTab from '$lib/components/TerrainTab.svelte';
-  import WeatherTab from '$lib/components/WeatherTab.svelte';
-  import { missedIssue, nextIssue, skopjeTime } from '$lib/format';
-  import { fill } from '$lib/i18n';
-  import { currentPlace, data, initContrast, initLang, loadFollowed, print, selectPlace, setContrast, setLang, t, toggleFollow, ui } from '$lib/state.svelte';
-  import { loadData } from '$lib/data';
-  import { onBeforePrint, onPrintKey } from '$lib/printLoader';
+  import { asset } from '$app/paths';
+  import { base } from '#lib/paths.ts';
+  import MapView from '#lib/components/MapView.svelte';
+  import Overview from '#lib/components/Overview.svelte';
+  import ReportsTab from '#lib/components/ReportsTab.svelte';
+  import { REPORTS_ENABLED, store } from '#lib/reports.ts';
+  import SourcesPanel from '#lib/components/SourcesPanel.svelte';
+  import PrintButton from '#lib/components/PrintButton.svelte';
+  import PointInspector from '#lib/components/PointInspector.svelte';
+  import TerrainTab from '#lib/components/TerrainTab.svelte';
+  import WeatherTab from '#lib/components/WeatherTab.svelte';
+  import { missedIssue, nextIssue, skopjeTime } from '#lib/format.ts';
+  import { fill } from '#lib/i18n.ts';
+  import { currentPlace, data, initContrast, initLang, loadFollowed, print, selectPlace, setContrast, setLang, t, toggleFollow, ui } from '#lib/state.svelte.ts';
+  import { loadData } from '#lib/data.ts';
+  import { onBeforePrint, onPrintKey } from '#lib/printLoader.ts';
 
   const dataBase = `${base}/data/`;
   const s = $derived(t());
@@ -135,7 +136,7 @@
 <aside class="panel" class:aside={!!ui.inspect}>
   <div class="top">
     <button class="brand" onclick={() => selectPlace(null)} aria-label={s.all_places}>
-      <img src="{base}/logo.png" alt="" width="34" height="21" />
+      <img src={asset('logo.png')} alt="" width="34" height="21" />
       <span><b>{s.brand}</b><small>{s.tagline}</small></span>
     </button>
     <div class="settings">

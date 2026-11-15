@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { fill } from '$lib/i18n';
-  import { ROLES, store, type Report, type Role } from '$lib/reports';
-  import { data, currentPlace, t, ui } from '$lib/state.svelte';
+  import { fill } from '#lib/i18n.ts';
+  import { ROLES, store, type Report, type Role } from '#lib/reports.ts';
+  import { data, currentPlace, t, ui } from '#lib/state.svelte.ts';
   import ReportForm from './ReportForm.svelte';
 
   const s = $derived(t());

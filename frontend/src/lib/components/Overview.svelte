@@ -1,9 +1,9 @@
 <script lang="ts">
   import WindArrow from './WindArrow.svelte';
-  import { num } from '$lib/format';
-  import { fill } from '$lib/i18n';
-  import { data, selectPlace, t, ui } from '$lib/state.svelte';
-  import type { Place } from '$lib/types';
+  import { num } from '#lib/format.ts';
+  import { fill } from '#lib/i18n.ts';
+  import { data, selectPlace, t, ui } from '#lib/state.svelte.ts';
+  import type { Place } from '#lib/types.ts';
   import LevelBadge from './LevelBadge.svelte';
 
   const s = $derived(t());

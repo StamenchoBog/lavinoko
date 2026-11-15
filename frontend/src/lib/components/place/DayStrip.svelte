@@ -2,10 +2,10 @@
   import WindArrow from '../WindArrow.svelte';
   // Today and the next days at the selected point, as cards. In the afternoon the planning day is
   // tomorrow, so it is highlighted; in the morning, today.
-  import { num } from '$lib/format';
-  import { fill } from '$lib/i18n';
-  import { data, t } from '$lib/state.svelte';
-  import type { Day, WeatherPoint } from '$lib/types';
+  import { num } from '#lib/format.ts';
+  import { fill } from '#lib/i18n.ts';
+  import { data, t } from '#lib/state.svelte.ts';
+  import type { Day, WeatherPoint } from '#lib/types.ts';
 
   let { point }: { point: WeatherPoint } = $props();
   const s = $derived(t());

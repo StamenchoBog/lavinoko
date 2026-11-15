@@ -1,7 +1,7 @@
 <script lang="ts">
   // Weather alert level: always symbol + word, never colour alone.
-  import { t } from '$lib/state.svelte';
-  import type { Level } from '$lib/types';
+  import { t } from '#lib/state.svelte.ts';
+  import type { Level } from '#lib/types.ts';
 
   let { level, compact = false }: { level: Level; compact?: boolean } = $props();
   const s = $derived(t());

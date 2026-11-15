@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { printNow } from '$lib/printLoader';
-  import type { PrintMode } from '$lib/printing';
-  import { t } from '$lib/state.svelte';
+  import { printNow } from '#lib/printLoader.ts';
+  import type { PrintMode } from '#lib/printing.ts';
+  import { t } from '#lib/state.svelte.ts';
 
   const s = $derived(t());
   let open = $state(false);

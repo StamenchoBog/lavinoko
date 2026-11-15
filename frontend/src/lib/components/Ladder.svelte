@@ -1,10 +1,10 @@
 <script lang="ts">
   import WindArrow from './WindArrow.svelte';
   // One row per forecast point, summit on top, like the mountain itself.
-  import { byHeight, num } from '$lib/format';
-  import { fill } from '$lib/i18n';
-  import { currentPlace, t, ui } from '$lib/state.svelte';
-  import type { WeatherPoint } from '$lib/types';
+  import { byHeight, num } from '#lib/format.ts';
+  import { fill } from '#lib/i18n.ts';
+  import { currentPlace, t, ui } from '#lib/state.svelte.ts';
+  import type { WeatherPoint } from '#lib/types.ts';
 
   let { period, caption = '' }: { period: 'past72' | 'next72'; caption?: string } = $props();
 
