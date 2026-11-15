@@ -16,8 +16,6 @@
   let pointMarkers: { marker: Marker; el: HTMLElement; id: string }[] = [];
   let firstRun = true;
   let sharedView = false; // the address bar already had a map position when the page opened
-  let reportMarkers: Marker[] = [];
-  let draftMarker: Marker | null = null;
 
   const narrow = () => matchMedia('(max-width: 560px)').matches;
   // The panel covers the left side (desktop) or the lower half (phone); keep the map's focus clear of it.
@@ -64,11 +62,7 @@
       created.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-right');
       created.setPadding(panelPadding());
       created.on('rotate', () => (bearing = created!.getBearing()));
-      created.on('click', (e) => {
-        // While the report form is open, a tap on the map sets the report's point.
-        if (ui.reportForm) ui.draftPoint = { lat: e.lngLat.lat, lon: e.lngLat.lng };
-        else ui.inspect = { lat: e.lngLat.lat, lon: e.lngLat.lng };
-      });
+      created.on('click', (e) => (ui.inspect = { lat: e.lngLat.lat, lon: e.lngLat.lng }));
       created.on('load', () => {
         map = created;
         simplifyBaseMap(created!);
@@ -310,9 +304,7 @@
       el.innerHTML = '<i></i><span></span>';
       el.addEventListener('click', (ev) => {
         ev.stopPropagation();
-        // While writing a report, a marker tap sets the report's point instead of navigating.
-        if (ui.reportForm) ui.draftPoint = { lat: p.center[1], lon: p.center[0] };
-        else selectPlace(p.id);
+        selectPlace(p.id);
       });
       placeMarkers[p.id] = { el, marker: new MarkerClass({ element: el, anchor: 'left', offset: [-MARKER_PAD - 6, 0] }).setLngLat(p.center).addTo(map!) };
     }
@@ -379,10 +371,6 @@
       el.setAttribute('aria-label', `${p.name[ui.lang]}, ${p.elevation} m`);
       el.addEventListener('click', (ev) => {
         ev.stopPropagation();
-        if (ui.reportForm) {
-          ui.draftPoint = { lat: p.lat, lon: p.lon };
-          return;
-        }
         ui.point = p.id;
         ui.tab = 'weather';
       });
@@ -404,23 +392,6 @@
     for (const pm of pointMarkers) pm.el.classList.toggle('on', pm.id === selected);
   });
 
-  $effect(() => {
-    const reports = data.reports;
-    if (!map) return;
-    for (const m of reportMarkers) m.remove();
-    reportMarkers = reports.map((r) => {
-      const el = document.createElement('button');
-      el.className = `report-marker${r.kinds.includes('avalanche') ? ' avalanche' : ''}`;
-      el.title = r.kinds.join(', ');
-      el.addEventListener('click', (ev) => {
-        ev.stopPropagation();
-        if (r.place_id) ui.place = r.place_id;
-        ui.tab = 'reports';
-      });
-      return new MarkerClass({ element: el }).setLngLat([r.lon, r.lat]).addTo(map!);
-    });
-  });
-
   // The tapped point (inspector).
   let inspectMarker: Marker | null = null;
   $effect(() => {
@@ -436,29 +407,6 @@
       const have = map.getPadding();
       if ((['top', 'right', 'bottom', 'left'] as const).some((k) => want[k] !== have[k])) map.setPadding(want);
     }
-  });
-
-  $effect(() => {
-    const pt = ui.draftPoint;
-    const open = ui.reportForm;
-    if (!map) return;
-    if (!open || !pt) {
-      draftMarker?.remove();
-      draftMarker = null;
-      return;
-    }
-    if (!draftMarker) {
-      draftMarker = new MarkerClass({ color: '#2468a8', draggable: true }).setLngLat([pt.lon, pt.lat]).addTo(map);
-      draftMarker.on('dragend', () => {
-        const ll = draftMarker!.getLngLat();
-        ui.draftPoint = { lat: ll.lat, lon: ll.lng };
-      });
-    } else {
-      draftMarker.setLngLat([pt.lon, pt.lat]);
-    }
-  });
-  $effect(() => {
-    if (map) map.getCanvas().style.cursor = ui.reportForm ? 'crosshair' : '';
   });
 
   $effect(() => {
@@ -532,11 +480,6 @@
   :global(.place-marker.serious i) { background: var(--serious); }
   :global(.place-marker.attention i), :global(.place-marker.serious i) { width: 15px; height: 15px; }
   :global(.map.far .place-marker span) { display: none; }
-  :global(.report-marker) {
-    width: 13px; height: 13px; padding: 0; border: 2px solid #fff; background: #5b3fa0; transform: rotate(45deg);
-    box-shadow: 0 0 0 1px #17283a66; cursor: pointer;
-  }
-  :global(.report-marker.avalanche) { background: var(--ink); width: 15px; height: 15px; }
   @media (max-width: 560px) {
     :global(.maplibregl-ctrl-bottom-right) { display: none; }
   }

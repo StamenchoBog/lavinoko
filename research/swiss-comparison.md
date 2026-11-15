@@ -30,7 +30,6 @@ Checked 2026-11-14. What the Swiss do well, what research says goes wrong, and w
 - Fixed rhythm 08:00 / 17:00, with "issued … next update …" on every page.
 - Place view opens with a summary in the A→B→C→D order: level → main concern → where (aspect rose + elevation) → why it matters. At most three concerns, most severe first.
 - Icon map: places coloured by level on the country map, plus a banner summing up the country.
-- Observation reports on a map, shown publicly at once; for avalanches the form asks for the release point.
 - Printable place view; archive of every forecast as issued.
 
 **Done differently / better**
@@ -45,6 +44,7 @@ Checked 2026-11-14. What the Swiss do well, what research says goes wrong, and w
 **Later (needs hosting or more data)**
 - Push notifications for unscheduled changes only (as SLF).
 - Measured values from stations; snow maps.
+- Observation reports on a map, shown publicly at once; for avalanches the release point (via a reused tool first, see `docs/architecture/`).
 - Machine-readable bulletin feed in the European standard format (CAAML) for other apps.
 - Region merging and real danger levels once trained forecasters issue them (Phase 2 of the roadmap).
 

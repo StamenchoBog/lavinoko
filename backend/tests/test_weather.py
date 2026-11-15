@@ -200,3 +200,35 @@ def test_consensus_with_two_models():
     wind = {"code": "strong_wind", "period": "next", "wind_kmh": 60, "level": "attention"}
     assert consensus([[wind], []]) == []  # 2 models: both must agree
     assert consensus([[wind], [wind]])[0]["models"] == 2
+
+
+def test_archive_keeps_blend_and_each_model_gzipped(tmp_path):
+    import gzip
+    import json
+    from datetime import UTC, datetime
+
+    from fetch_weather import archive_record, write_archive
+
+    place = {"id": "kozuf"}
+    pt = {"id": "summit", "lon": 22.2, "lat": 41.17, "elevation": 2170}
+    blend = {"hourly": {"time": ["2026-01-10T00:00"], "snowfall": [1.0]}}
+    models = {"hourly": {"time": ["2026-01-10T00:00"], "snowfall_icon_eu": [1.2]}}
+    now = datetime(2026, 1, 10, 6, 17, tzinfo=UTC)
+
+    rec = archive_record("2026-01-10T06:17:00+00:00", [(place, pt)], [blend], [models], {"icon_eu": "ok"})
+    path = write_archive(rec, tmp_path, now)
+
+    assert path == tmp_path / "2026" / "01" / "2026-01-10T06Z.json.gz"
+    back = json.loads(gzip.decompress(path.read_bytes()))
+    assert back["points"][0]["hourly"]["snowfall"] == [1.0]
+    assert back["points"][0]["models_hourly"]["snowfall_icon_eu"] == [1.2]
+    assert back["models"]["health"] == {"icon_eu": "ok"}
+    # Same content, same bytes: a repeated run does not show up as a change in git.
+    assert write_archive(rec, tmp_path, now).read_bytes() == path.read_bytes()
+
+
+def test_archive_records_a_failed_model_request_as_null():
+    from fetch_weather import archive_record
+
+    rec = archive_record("t", [({"id": "p"}, {"id": "x"})], [{"hourly": {}}], [None], {})
+    assert rec["points"][0]["models_hourly"] is None

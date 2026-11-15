@@ -4,8 +4,6 @@
   import { base } from '#lib/paths.ts';
   import MapView from '#lib/components/MapView.svelte';
   import Overview from '#lib/components/Overview.svelte';
-  import ReportsTab from '#lib/components/ReportsTab.svelte';
-  import { REPORTS_ENABLED, store } from '#lib/reports.ts';
   import SourcesPanel from '#lib/components/SourcesPanel.svelte';
   import PrintButton from '#lib/components/PrintButton.svelte';
   import PointInspector from '#lib/components/PointInspector.svelte';
@@ -27,10 +25,6 @@
     initContrast();
     loadFollowed();
     try {
-      if (REPORTS_ENABLED) {
-        store.list().then((r) => (data.reports = r)).catch(() => {});
-        store.observer().then((o) => (data.observer = o)).catch(() => {});
-      }
       loadData('sources', 'sources.json').then((d) => (data.sources = d?.sources ?? []));
       const [meta, weather] = await Promise.all([loadData('terrain', 'terrain/metadata.json'), loadData('weather', 'weather.json')]);
       if (!meta) throw new Error('No valid terrain/metadata.json');
@@ -40,7 +34,7 @@
       const wanted = params.get('place');
       if (wanted && data.placesById.has(wanted)) selectPlace(wanted);
       const tab = params.get('tab');
-      if (tab === 'terrain' || (tab === 'reports' && REPORTS_ENABLED)) ui.tab = tab;
+      if (tab === 'terrain') ui.tab = tab;
     } catch (err) {
       ui.error = true;
       console.error(err);
@@ -54,7 +48,7 @@
   // Tabs (WAI-ARIA tabs pattern): only the selected tab is in the Tab order; arrows, Home and End
   // move between tabs and select them at once.
   type Tab = typeof ui.tab;
-  const tabs = $derived<Tab[]>([...(data.weather ? (['weather'] as const) : []), 'terrain', ...(REPORTS_ENABLED ? (['reports'] as const) : [])]);
+  const tabs = $derived<Tab[]>([...(data.weather ? (['weather'] as const) : []), 'terrain']);
   function tabKey(e: KeyboardEvent) {
     const n = tabs.length;
     const i = tabs.indexOf(ui.tab);
@@ -175,7 +169,7 @@
     {#each tabs as tab (tab)}
       <button role="tab" id="tab-{tab}" aria-selected={ui.tab === tab} aria-controls="tabpanel"
         tabindex={ui.tab === tab ? 0 : -1} onclick={() => (ui.tab = tab)}>
-        {#if tab === 'weather'}{s.tab_weather}{:else if tab === 'terrain'}{s.tab_terrain}{:else}{s.tab_reports}{#if data.reports.length}<span class="count">{data.reports.length}</span>{/if}{/if}
+        {#if tab === 'weather'}{s.tab_weather}{:else}{s.tab_terrain}{/if}
       </button>
     {/each}
   </div>
@@ -183,8 +177,6 @@
   <div id="tabpanel" role="tabpanel" aria-labelledby="tab-{ui.tab}">
     {#if ui.tab === 'terrain'}
       <TerrainTab />
-    {:else if ui.tab === 'reports' && REPORTS_ENABLED}
-      <ReportsTab />
     {:else if place}
       <WeatherTab />
     {:else}
@@ -301,7 +293,6 @@
   .tabs { display: flex; gap: 18px; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
   .tabs button { border: 0; background: none; padding: 0 0 8px; cursor: pointer; font-weight: 650; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
   .tabs button[aria-selected='true'] { color: var(--ink); border-color: var(--ink); }
-  .count { display: inline-block; margin-left: 5px; min-width: 18px; padding: 0 5px; border-radius: 9px; background: var(--ink); color: #fff; font-size: 11px; line-height: 18px; text-align: center; }
 
   /* Phone: panel and point card are bottom sheets, so the notices go to the top of the screen,
      left of the map buttons, and stay there when the panel gives way to a map point. */

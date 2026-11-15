@@ -69,6 +69,7 @@ frontend/   SvelteKit static site
 backend/    Python pipeline: terrain/, weather/, contract/ (shape of every data file), tests/
 config/     regions.json (places), sources.json (licences and credits)
 docs/       architecture decisions (hosting is still open)
+ops/        files for the lavinoko-archive repository (forecast archive schedule)
 research/   incidents, Swiss comparison, user needs
 ```
 

@@ -1,6 +1,5 @@
 import { replaceState } from '$app/navigation';
 import { STRINGS } from './i18n';
-import type { Observer, Report } from './reports';
 import type { Component } from 'svelte';
 import type { MapPicture } from './mapHandle';
 import type { HourlyPoint, Lang, Place, Source, TerrainMeta, Weather } from './types';
@@ -16,15 +15,13 @@ function savedLang(): Lang {
 
 export const ui = $state({
   lang: 'mk' as Lang,
-  tab: 'weather' as 'weather' | 'terrain' | 'reports',
+  tab: 'weather' as 'weather' | 'terrain',
   layer: 'slope' as 'slope' | 'aspect',
   relief: true,
   contours: true,
   inspect: null as { lat: number; lon: number } | null, // tapped map point (point inspector)
   place: null as string | null, // selected place id; null = country overview
   point: null as string | null, // selected forecast point within the place
-  reportForm: false, // the new-report form is open (map taps then set its point)
-  draftPoint: null as { lat: number; lon: number } | null,
   error: false,
   highContrast: false, // bright-snow mode: full ink on pure white
   followed: [] as string[]
@@ -36,8 +33,6 @@ class Data {
   meta = $state.raw<TerrainMeta | null>(null);
   weather = $state.raw<Weather | null>(null);
   sources = $state.raw<Source[]>([]);
-  reports = $state.raw<Report[]>([]);
-  observer = $state.raw<Observer | null>(null);
   /** Places by id, rebuilt only when a new forecast arrives. */
   placesById = $derived(new Map<string, Place>(this.weather?.places.map((p) => [p.id, p]) ?? []));
 }
@@ -83,7 +78,7 @@ export function selectPlace(id: string | null) {
   ui.place = id;
   const place = currentPlace();
   ui.point = place ? ([...place.points].sort((a, b) => b.elevation - a.elevation)[0]?.id ?? null) : null;
-  if (ui.tab !== 'reports') ui.tab = 'weather';
+  ui.tab = 'weather';
   // eslint-disable-next-line svelte/prefer-svelte-reactivity -- only passed to replaceState
   const url = new URL(location.href);
   if (id) url.searchParams.set('place', id);

@@ -1,12 +1,15 @@
 """Fetch mountain weather for every place's forecast points and summarise it.
 
 Usage:
-    cd backend && uv run python weather/fetch_weather.py
+    cd backend && uv run python weather/fetch_weather.py [--archive DIR]
 
 Writes:
     frontend/static/data/weather.json   what the page shows (last 72 h, next 72 h), all places
-    archive/weather/<time>.json         the full hourly forecast as issued, kept for
-                                            checking forecasts against what actually happened
+    archive/weather/YYYY/MM/<time>.json.gz
+                                        the full hourly forecast as issued (blend and each model),
+                                        kept for checking forecasts against what actually happened.
+                                        Scheduled runs store it in the lavinoko-archive repository
+                                        (.github/workflows/forecast.yml).
 
 Source: Open-Meteo (https://open-meteo.com), free for non-commercial use, CC BY 4.0.
 These are forecast-model values, not measurements.
@@ -15,6 +18,7 @@ These are forecast-model values, not measurements.
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import math
 import sys
@@ -487,7 +491,43 @@ class DataError(RuntimeError):
     """The forecast data is unusable; nothing was published."""
 
 
-def build(now_utc: datetime | None = None) -> dict:
+ARCHIVE_FORMAT = 1  # bump when the archive record changes shape
+
+
+def archive_record(issued: str, flat: list, series: list, ensemble: list, model_status: dict) -> dict:
+    """The forecast as issued: the blend the page summarises, and each model's own series, so both
+    the forecast values and the 2-of-3 model alerts can be checked against reality later."""
+    return {
+        "format": ARCHIVE_FORMAT,
+        "issued_utc": issued,
+        "source": "Open-Meteo forecast API (CC BY 4.0), https://open-meteo.com",
+        "timezone": TZ,
+        "models": {"blend": "Open-Meteo best match", "consensus": CONSENSUS_MODELS, "health": model_status},
+        "thresholds": T,
+        "points": [
+            {
+                "place": place["id"],
+                **pt,
+                "hourly": s["hourly"],
+                # Variables suffixed with the model name, e.g. "snowfall_icon_eu"; null if the request failed.
+                "models_hourly": ens["hourly"] if ens else None,
+            }
+            for (place, pt), s, ens in zip(flat, series, ensemble, strict=True)
+        ],
+    }
+
+
+def write_archive(record: dict, directory: Path, now_utc: datetime) -> Path:
+    """Write one gzipped record to <directory>/YYYY/MM/YYYY-MM-DDTHHZ.json.gz and return its path.
+    mtime=0 keeps the file identical for identical content (no needless changes in git)."""
+    path = directory / now_utc.strftime("%Y/%m") / f"{now_utc.strftime('%Y-%m-%dT%HZ')}.json.gz"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    text = json.dumps(record, ensure_ascii=False, separators=(",", ":")).encode()
+    path.write_bytes(gzip.compress(text, compresslevel=9, mtime=0))
+    return path
+
+
+def build(now_utc: datetime | None = None, archive: Path = ARCHIVE) -> dict:
     """One request for every forecast point of every place; one JSON for the whole country."""
     places = REGIONS["places"]
     flat = [(place, pt) for place in places for pt in place["points"]]
@@ -572,23 +612,17 @@ def build(now_utc: datetime | None = None) -> dict:
         (WEB / name).write_text(text)
 
     # Keep the full hourly forecast as issued, for verification later.
-    ARCHIVE.mkdir(parents=True, exist_ok=True)
-    raw = {
-        "issued_utc": issued,
-        "points": [
-            {"place": place["id"], **pt, "hourly": s["hourly"]} for (place, pt), s in zip(flat, series, strict=True)
-        ],
-    }
-    (ARCHIVE / f"{now_utc.strftime('%Y-%m-%dT%HZ')}.json").write_text(
-        json.dumps(raw, ensure_ascii=False, separators=(",", ":"))
-    )
+    path = write_archive(archive_record(issued, flat, series, ensemble, model_status), archive, now_utc)
+    print(f"Archived {path}")
     return result
 
 
 def main() -> int:
-    argparse.ArgumentParser(description="Fetch and summarise mountain weather for all places.").parse_args()
+    ap = argparse.ArgumentParser(description="Fetch and summarise mountain weather for all places.")
+    ap.add_argument("--archive", type=Path, default=ARCHIVE, help=f"archive directory (default: {ARCHIVE})")
+    args = ap.parse_args()
     try:
-        r = build()
+        r = build(archive=args.archive)
     except DataError as e:
         print(f"::error::{e}")  # shown as an error annotation in GitHub Actions
         return 1

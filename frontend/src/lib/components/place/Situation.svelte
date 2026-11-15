@@ -1,7 +1,8 @@
 <script lang="ts">
-  // "Situation": the weather concerns of a place, expressed as the avalanche problem they typically
+  // "Weather to watch": the weather concerns of a place, grouped by the avalanche problem they typically
   // create (after SLF "Caution Avalanches!", 2026): what, how long it lasts, where, what to look for.
-  // Weather-based only: not a danger rating, and old weak layers can't be judged from weather.
+  // Cards are named after the weather, never the avalanche problem, and nothing here may read as
+  // "safe": this is not a danger rating, and old weak layers can't be judged from weather.
   import { byHeight, num } from '#lib/format.ts';
   import { fill, type Problem } from '#lib/i18n.ts';
   import { currentPlace, t } from '#lib/state.svelte.ts';
@@ -63,7 +64,7 @@
   {:else if key === 'wet_snow'}
     <svg viewBox="0 0 24 24"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z" /></svg>
   {:else}
-    <svg viewBox="0 0 24 24"><path d="m5 12 4 4 10-10" /></svg>
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 11v6M12 7.5v.5" /></svg>
   {/if}
 {/snippet}
 

@@ -1,0 +1,75 @@
+name: Forecast archive
+
+# Fetches the mountain forecast with this repository's code and commits the archive file
+# (weather/YYYY/MM/<time>.json.gz) to the repository that calls this workflow.
+#
+# Called twice a day by the schedule in the lavinoko-archive repository (template: ops/archive-repo/).
+# The schedule lives there, not here, because:
+#   - it writes with that repository's own token: no secret or key to create, rotate or leak;
+#   - its twice-daily commits keep that repository active, so GitHub never switches the schedule
+#     off (it does so after 60 days without activity in the repository that holds the schedule).
+#
+# A failed or unhealthy fetch fails the run (GitHub e-mails the owner); a file that was written is
+# still committed.
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    name: Fetch and archive
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write # the calling (archive) repository
+    steps:
+      - name: Check out LavinOko code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: StamenchoBog/lavinoko
+          ref: main
+          path: code
+          persist-credentials: false
+
+      # Only the newest commit and only README.md on disk: the archive grows every day, and
+      # this job only adds a file, so it never downloads the files already stored.
+      - name: Check out the archive repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: archive
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: README.md
+          sparse-checkout-cone-mode: false
+
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.11.33"
+          working-directory: code/backend
+
+      - name: Fetch forecast
+        working-directory: code/backend
+        run: uv run --locked python weather/fetch_weather.py --archive "$GITHUB_WORKSPACE/archive/weather"
+
+      - name: Commit archive file
+        if: ${{ !cancelled() }}
+        working-directory: archive
+        run: |
+          git add --sparse weather
+          if git diff --cached --quiet; then
+            echo "::warning::No archive file was written"
+            exit 0
+          fi
+          # Set for the whole checkout: a rebase below writes commits too.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -q -m "Forecast $(date -u +%Y-%m-%dT%H:%MZ)"
+          # Another run may have pushed in the meantime; file names never collide, so rebase and retry.
+          for attempt in 1 2 3; do
+            git push -q && exit 0
+            sleep $((attempt * 5))
+            git pull -q --rebase
+          done
+          exit 1

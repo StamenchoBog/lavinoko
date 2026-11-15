@@ -6,28 +6,26 @@ LavinOko is developed locally until it is a polished product; hosting is decided
 
 - **Website:** SvelteKit built to static files (`frontend/`). Runs on any static host.
 - **Data pipeline:** Python (`backend/`): terrain layers (PMTiles) and the twice-daily weather forecast.
-- **Field reports:** invited observers only (guides, ski patrol, mountain rescue, forecasters).
-  Reports are shown immediately, labelled by role and organisation, never by name or e-mail.
-  Photos are re-encoded in the browser, which removes GPS position and camera details.
 
-## What is open: where reports are stored
+## Field reports: reuse first
 
-Reports are currently **switched off** in the page (`REPORTS_ENABLED = false`); the code is kept for later.
-
-The page talks only to the `ReportStore` interface in `frontend/src/lib/reports.ts`.
-Today the only implementation is **local** (IndexedDB in the browser, test sign-in by role), clearly
-labelled in the page. Choosing hosting means adding one implementation of that interface.
-
-| Option | Notes |
-|---|---|
-| Supabase (hosted or self-hosted) | Postgres + login by e-mail link + photo storage. Draft schema with access rules: `option-supabase-schema.sql`. Free tier is enough for a pilot. |
-| Own server | e.g. a small API + Postgres on a grant-funded VPS. Same data model as the draft schema. |
-
-Questions to settle before choosing: who administers observer accounts, where personal data
-(observer e-mail addresses) is hosted (North Macedonia's personal data protection law applies),
-and how reports are backed up.
+An own report system (form, local store, draft Supabase schema) was built and then removed on 2026-11-15,
+before anyone had used it. Following the roadmap, the first winter uses an existing tool (Regobs if it accepts
+outside regions, otherwise a plain form), and LavinOko only shows the reports on its map. An own system is
+built only once guides and patrol are actually submitting. The removed code is in git history
+(last present in commit `f3ab3c7`).
 
 ## Also open
 
-- **Hosting the website and scheduled forecast updates:** not set up; CI only runs checks. Wherever the site
-  is hosted, `backend/weather/fetch_weather.py` must run on a schedule (it exits non-zero on unhealthy data).
+- **Hosting the website:** not set up; CI only runs checks. Wherever the site is hosted, it needs the same
+  scheduled `backend/weather/fetch_weather.py` run as the archive below (it exits non-zero on unhealthy data).
+
+## Forecast archive
+
+Every forecast run (the blend and each model, ~300 KB gzipped, ~175 MB per October–June season) is committed to a
+separate public repository, `lavinoko-archive`. That repository holds only the schedule
+(`ops/archive-repo/.github/workflows/fetch.yml`, 06:17 and 15:17 UTC); it calls
+`.github/workflows/forecast.yml` here, which fetches with this repository's code and commits back with the
+archive repository's own token. No secret is needed, and the archive's daily commits keep GitHub from
+disabling the schedule. The archive repo stays under GitHub's 1 GB guideline for about five seasons; then start
+one repository per season, or publish closed seasons to Zenodo.
