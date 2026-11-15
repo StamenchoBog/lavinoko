@@ -232,3 +232,75 @@ def test_archive_records_a_failed_model_request_as_null():
 
     rec = archive_record("t", [({"id": "p"}, {"id": "x"})], [{"hourly": {}}], [None], {})
     assert rec["points"][0]["models_hourly"] is None
+
+
+class _Resp:
+    def __init__(self, body):
+        self.body = body
+
+    def __enter__(self):
+        import io
+
+        return io.BytesIO(self.body)
+
+    def __exit__(self, *a):
+        return False
+
+
+def _fake_urlopen(outcomes):
+    """urlopen stand-in: each call takes the next outcome (an exception to raise, or bytes to return)."""
+    calls = []
+
+    def fake(req, timeout):
+        calls.append(req)
+        o = outcomes.pop(0)
+        if isinstance(o, Exception):
+            raise o
+        return _Resp(o)
+
+    return fake, calls
+
+
+def _http(code, retry_after=None):
+    from email.message import Message
+    from urllib.error import HTTPError
+
+    h = Message()
+    if retry_after:
+        h["Retry-After"] = retry_after
+    return HTTPError("https://api.open-meteo.com", code, "x", h, None)
+
+
+def test_get_json_retries_rate_limits_and_outages(monkeypatch):
+    from urllib.error import URLError
+
+    import fetch_weather
+
+    fake, calls = _fake_urlopen([_http(429, "7"), URLError("timed out"), _http(503), b'{"ok": 1}'])
+    monkeypatch.setattr(fetch_weather, "urlopen", fake)
+    waited = []
+    assert fetch_weather.get_json("req", waits=(1, 2, 3), sleep=waited.append) == {"ok": 1}
+    assert len(calls) == 4
+    assert waited == [7, 2, 3]  # the server's Retry-After wins over the default wait
+
+
+def test_get_json_gives_up_after_the_last_retry(monkeypatch):
+    import fetch_weather
+    import pytest
+
+    fake, calls = _fake_urlopen([_http(503), _http(503)])
+    monkeypatch.setattr(fetch_weather, "urlopen", fake)
+    with pytest.raises(fetch_weather.HTTPError):
+        fetch_weather.get_json("req", waits=(1,), sleep=lambda s: None)
+    assert len(calls) == 2
+
+
+def test_get_json_does_not_retry_a_bad_request(monkeypatch):
+    import fetch_weather
+    import pytest
+
+    fake, calls = _fake_urlopen([_http(400)])
+    monkeypatch.setattr(fetch_weather, "urlopen", fake)
+    with pytest.raises(fetch_weather.HTTPError):
+        fetch_weather.get_json("req", waits=(1, 2), sleep=lambda s: None)
+    assert len(calls) == 1

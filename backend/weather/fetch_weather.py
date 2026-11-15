@@ -22,8 +22,10 @@ import gzip
 import json
 import math
 import sys
+import time
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
@@ -139,9 +141,36 @@ def fetch(points: list[dict], models: list[str] | None = None, hourly: list[str]
     req = Request(
         f"{API}?{urlencode(params)}", headers={"User-Agent": "lavinoko/0.1 (+https://github.com/StamenchoBog/lavinoko)"}
     )
-    with urlopen(req, timeout=60) as r:
-        data = json.load(r)
+    data = get_json(req)
     return data if isinstance(data, list) else [data]
+
+
+# Waits before each retry. Scheduled runs share IP addresses with other GitHub users, so Open-Meteo's
+# per-address limit ("too many requests") and brief outages are expected now and then.
+RETRY_WAITS_S = (10, 30, 90)
+RETRY_STATUS = {429, 500, 502, 503, 504}
+
+
+def get_json(req: Request, waits: tuple[float, ...] = RETRY_WAITS_S, sleep=time.sleep):
+    """GET and parse JSON, retrying on rate limits, server errors, timeouts and network errors."""
+    for attempt in range(len(waits) + 1):
+        try:
+            with urlopen(req, timeout=60) as r:
+                return json.load(r)
+        except HTTPError as e:
+            if e.code not in RETRY_STATUS or attempt == len(waits):
+                raise
+            # Honour the server's own wait if it gives one in seconds (capped at 5 minutes).
+            after = e.headers.get("Retry-After", "") if e.headers else ""
+            wait = min(float(after), 300) if after.isdigit() else waits[attempt]
+            reason = f"HTTP {e.code}"
+        except (URLError, TimeoutError) as e:
+            if attempt == len(waits):
+                raise
+            wait, reason = waits[attempt], str(getattr(e, "reason", e))
+        print(f"::warning::Open-Meteo request failed ({reason}); retry {attempt + 1} of {len(waits)} in {wait:g} s")
+        sleep(wait)
+    raise AssertionError("unreachable")
 
 
 def _sum(values) -> float:
