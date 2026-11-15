@@ -3,7 +3,7 @@ name: Forecast archive
 # Fetches the mountain forecast with this repository's code and commits the archive file
 # (weather/YYYY/MM/<time>.json.gz) to the repository that calls this workflow.
 #
-# Called twice a day by the schedule in the lavinoko-archive repository (template: ops/archive-repo/).
+# Called by the schedule in https://github.com/StamenchoBog/lavinoko-archive (.github/workflows/fetch.yml).
 # The schedule lives there, not here, because:
 #   - it writes with that repository's own token: no secret or key to create, rotate or leak;
 #   - its twice-daily commits keep that repository active, so GitHub never switches the schedule

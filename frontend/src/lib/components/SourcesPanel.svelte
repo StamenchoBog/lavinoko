@@ -19,6 +19,8 @@
     {/each}
   </ul>
   <p class="small">{s.disclaimer}</p>
+  <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external site -->
+  <p class="small"><a href="https://github.com/StamenchoBog/lavinoko" target="_blank" rel="noopener">{s.project_credit}</a></p>
 </details>
 
 <style>

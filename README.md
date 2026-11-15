@@ -3,6 +3,9 @@
 *"Avalanche Eye"*: a free, open avalanche information service for the mountains of North Macedonia,
 covering 8 ski areas and 9 freeride/touring summits.
 
+LavinOko is the project. The site it builds is called **Лавински информации / Avalanche information** and only
+credits "Project LavinOko".
+
 > 🚧 **Proof of concept, not deployed.** It shows terrain and weather, **not avalanche danger**, and the forecasts
 > have not been verified. Do not use it to make decisions in avalanche terrain.
 
@@ -66,10 +69,9 @@ CI (`.github/workflows/ci.yml`) runs these on every push and pull request.
 
 ```
 frontend/   SvelteKit static site
-backend/    Python pipeline: terrain/, weather/, contract/ (shape of every data file), tests/
+backend/    Python pipeline: terrain/, weather/, contract/ (shape of every data file), ates/ (draft terrain classes), tests/
 config/     regions.json (places), sources.json (licences and credits)
-docs/       architecture decisions (hosting is still open)
-ops/        files for the lavinoko-archive repository (forecast archive schedule)
+docs/       architecture decisions (hosting is still open); the forecast archive is in StamenchoBog/lavinoko-archive
 research/   incidents, Swiss comparison, user needs
 ```
 

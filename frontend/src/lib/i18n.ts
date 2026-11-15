@@ -7,7 +7,7 @@ import type { FlagCode, Lang } from './types';
 export type Problem = 'new_snow' | 'wind_slab' | 'wet_snow';
 
 const mk = {
-  tagline: 'Систем за лавински информации',
+  tagline: 'Македонија',
   sit_title: 'Временски појави',
   sit_where: 'Каде',
   sit_look: 'Гледајте на терен',
@@ -130,7 +130,8 @@ const mk = {
   following: 'Следено',
   followed_title: 'Следени места',
   consensus_note: 'Предупредувањата се прикажуваат само кога барем 2 од 3 независни модели (ICON-EU, GFS, Météo-France) ја предвидуваат истата појава.',
-  brand: 'ЛавинОко',
+  brand: 'Лавински информации',
+  project_credit: 'Проект ЛавинОко · отворен код',
   level_attention: 'Значајно време',
   level_serious: 'Сериозно време',
   banner_serious: '{n} места со сериозни временски појави',
@@ -199,7 +200,7 @@ const mk = {
 export type Strings = typeof mk;
 
 const en: Strings = {
-  tagline: 'Avalanche information system',
+  tagline: 'North Macedonia',
   sit_title: 'Weather to watch',
   sit_where: 'Where',
   sit_look: 'Look for',
@@ -322,7 +323,8 @@ const en: Strings = {
   following: 'Following',
   followed_title: 'Followed places',
   consensus_note: 'Alerts appear only when at least 2 of 3 independent models (ICON-EU, GFS, Météo-France) forecast the same thing.',
-  brand: 'LavinOko',
+  brand: 'Avalanche information',
+  project_credit: 'Project LavinOko · open source',
   level_attention: 'Notable weather',
   level_serious: 'Serious weather',
   banner_serious: '{n} places with serious weather',
