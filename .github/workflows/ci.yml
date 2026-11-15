@@ -76,7 +76,7 @@ jobs:
       # pnpm version from "packageManager" in frontend/package.json. Before setup-node, so its cache finds pnpm.
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         with:
-          package-json-file: frontend/package.json
+          package_json_file: frontend/package.json
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22"
@@ -107,7 +107,7 @@ jobs:
       # pnpm version from "packageManager" in frontend/package.json. Before setup-node, so its cache finds pnpm.
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         with:
-          package-json-file: frontend/package.json
+          package_json_file: frontend/package.json
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22"
