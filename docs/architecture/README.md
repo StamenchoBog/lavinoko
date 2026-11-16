@@ -27,7 +27,7 @@ separate public repository, `lavinoko-archive`. That repository holds only the s
 ([`lavinoko-archive/.github/workflows/fetch.yml`](https://github.com/StamenchoBog/lavinoko-archive/blob/main/.github/workflows/fetch.yml)); it calls
 `.github/workflows/forecast.yml` here, which fetches with this repository's code and commits back with the
 archive repository's own token. GitHub starts scheduled runs late (hours, on 15 Nov 2026) or drops them, so the
-on-time runs at 06:17 and 15:17 UTC are started by cron-job.org through the API (`workflow_dispatch`, with a
+on-time runs at 06:17 and 15:17 UTC are started by a Cloudflare Worker (`workers/archive-trigger/`) through the API (`workflow_dispatch`, with a
 fine-grained token that can only start workflows in the archive repository). GitHub's own schedule is the backup:
 30 and 90 minutes later, plus one run a month in summer so GitHub never disables it. Every scheduled run fetches only
 if nothing is archived yet for the current slot (since 06:00 or 15:00 UTC), so late runs do no harm. Open-Meteo requests are retried on rate limits and outages. The archive repo stays under GitHub's 1 GB guideline for about five seasons; then start

@@ -52,12 +52,9 @@ there; that would stop the archive.
 - [ ] Settings → Actions → Workflow permissions: read and write (needed for the commit); "create and approve pull
       requests" off.
 - [ ] Issues and wiki off; point people to `lavinoko` instead.
-- [ ] On-time trigger: a fine-grained token (only `lavinoko-archive`, permission **Actions: read and write**, nothing
-      else, 1 year expiry) in two cron-job.org jobs, 06:17 and 15:17 UTC, October to June, plus 06:17 UTC on 1 July,
-      1 August and 1 September:
-      `POST https://api.github.com/repos/StamenchoBog/lavinoko-archive/actions/workflows/fetch.yml/dispatches`,
-      headers `Authorization: Bearer <token>`, `Accept: application/vnd.github+json`, body `{"ref":"main"}`.
-      GitHub answers `204` when the run was started.
+- [ ] On-time trigger: the Cloudflare Worker in `workers/archive-trigger/` (deploy steps in its README), with a
+      fine-grained token as its `GITHUB_TOKEN` secret: only `lavinoko-archive`, permission **Actions: read and
+      write**, nothing else, 1 year expiry.
 
 ### Your account
 - [ ] Two-factor authentication with a security key or passkey.
@@ -71,8 +68,9 @@ ahead. When the site gets its domain, add `Canonical: https://<domain>/.well-kno
 
 ## Yearly: archive trigger token
 
-The cron-job.org token (see `lavinoko-archive` above) expires a year after it was made. Before then, generate a new
-one with the same settings and replace it in both jobs. If it lapses, the archive still runs, only late, on GitHub's
+The Worker's `GITHUB_TOKEN` (see `lavinoko-archive` above) expires a year after it was made. Before then, generate a
+new one with the same settings and run `pnpm dlx wrangler@<version> secret put GITHUB_TOKEN` in
+`workers/archive-trigger/`. If it lapses, the archive still runs, only late, on GitHub's
 backup schedule.
 
 ## Security fixes that are newer than 7 days

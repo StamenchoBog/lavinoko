@@ -74,6 +74,7 @@ backend/    Python pipeline: terrain/, weather/, contract/ (shape of every data 
 config/     regions.json (places), sources.json (licences and credits)
 docs/       architecture decisions (hosting is still open); the forecast archive is in StamenchoBog/lavinoko-archive
 research/   incidents, Swiss comparison, user needs
+workers/    archive-trigger/: Cloudflare Worker that starts the forecast archive on time
 ```
 
 To add a place, edit `config/regions.json` and rerun both backend scripts.

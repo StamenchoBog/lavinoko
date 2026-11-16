@@ -1,0 +1,19 @@
+// Cloudflare Worker that starts the forecast archive on time. See README.md here.
+{
+  "$schema": "https://unpkg.com/wrangler@4.156.0/config-schema.json",
+  "name": "lavinoko-archive-trigger",
+  "main": "index.js",
+  "compatibility_date": "2026-10-15",
+  // No URL: the Worker only runs on its schedule.
+  "workers_dev": false,
+  "preview_urls": false,
+  "triggers": {
+    // UTC (Cloudflare cron is always UTC). 07:17 and 16:17 in Skopje in winter, ahead of the 08:00 / 17:00 issues.
+    // Keep in step with the backup schedule in lavinoko-archive/.github/workflows/fetch.yml.
+    "crons": [
+      "17 6,15 * 1-6,10-12 *", // October to June: twice a day
+      "17 6 1 7-9 *" // summer: once a month
+    ]
+  },
+  "observability": { "enabled": true }
+}
