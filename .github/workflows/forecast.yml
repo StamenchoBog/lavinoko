@@ -15,7 +15,9 @@ on:
   workflow_call:
     inputs:
       only_if_missing:
-        description: Backup run. Do nothing if a file from the last 3 hours is already archived.
+        description: >-
+          Backup run. Do nothing if the current forecast slot is already archived. The slots start at
+          06:00 and 15:00 UTC, so a run that GitHub starts hours late still finds the earlier file.
         type: boolean
         default: false
 
@@ -55,15 +57,22 @@ jobs:
         if: ${{ inputs.only_if_missing }}
         working-directory: archive
         run: |
-          for h in 0 1 2 3; do
+          # Start of the current slot: 06:00 or 15:00 UTC today, or 15:00 yesterday before 06:00.
+          hour=$((10#$(date -u +%H)))
+          if [ "$hour" -ge 15 ]; then start=$(date -u +%Y-%m-%dT15:00Z)
+          elif [ "$hour" -ge 6 ]; then start=$(date -u +%Y-%m-%dT06:00Z)
+          else start=$(date -u -d yesterday +%Y-%m-%dT15:00Z)
+          fi
+          hours=$(( ($(date -u +%s) - $(date -u -d "$start" +%s)) / 3600 ))
+          for h in $(seq 0 "$hours"); do
             f=$(date -u -d "-$h hour" +weather/%Y/%m/%Y-%m-%dT%HZ.json.gz)
             if [ -n "$(git ls-tree --name-only HEAD "$f")" ]; then
-              echo "Already archived: $f. The scheduled run worked; nothing to do."
+              echo "Already archived: $f. This slot (since $start) is done; nothing to do."
               echo "skip=true" >> "$GITHUB_OUTPUT"
               exit 0
             fi
           done
-          echo "::warning::No archive file from the last 3 hours: the scheduled run was missed or failed. Fetching now."
+          echo "::warning::Nothing archived since $start: the earlier run was missed or failed. Fetching now."
 
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         if: ${{ steps.recent.outputs.skip != 'true' }}

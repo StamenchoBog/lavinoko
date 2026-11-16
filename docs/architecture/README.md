@@ -24,8 +24,11 @@ built only once guides and patrol are actually submitting. The removed code is i
 
 Every forecast run (the blend and each model, ~300 KB gzipped, ~175 MB per October–June season) is committed to a
 separate public repository, `lavinoko-archive`. That repository holds only the schedule
-([`lavinoko-archive/.github/workflows/fetch.yml`](https://github.com/StamenchoBog/lavinoko-archive/blob/main/.github/workflows/fetch.yml): 06:17 and 15:17 UTC, a backup run 90 minutes later that
-fetches only if the main run is missing, and one run a month in summer so GitHub never disables the schedule); it calls
+([`lavinoko-archive/.github/workflows/fetch.yml`](https://github.com/StamenchoBog/lavinoko-archive/blob/main/.github/workflows/fetch.yml)); it calls
 `.github/workflows/forecast.yml` here, which fetches with this repository's code and commits back with the
-archive repository's own token. No secret is needed. Open-Meteo requests are retried on rate limits and outages. The archive repo stays under GitHub's 1 GB guideline for about five seasons; then start
+archive repository's own token. GitHub starts scheduled runs late (hours, on 15 Nov 2026) or drops them, so the
+on-time runs at 06:17 and 15:17 UTC are started by cron-job.org through the API (`workflow_dispatch`, with a
+fine-grained token that can only start workflows in the archive repository). GitHub's own schedule is the backup:
+30 and 90 minutes later, plus one run a month in summer so GitHub never disables it. Every scheduled run fetches only
+if nothing is archived yet for the current slot (since 06:00 or 15:00 UTC), so late runs do no harm. Open-Meteo requests are retried on rate limits and outages. The archive repo stays under GitHub's 1 GB guideline for about five seasons; then start
 one repository per season, or publish closed seasons to Zenodo.
