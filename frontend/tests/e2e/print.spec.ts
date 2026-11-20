@@ -11,6 +11,9 @@ test.beforeEach(async ({ page }) => {
   });
 });
 const printed = (page: import('@playwright/test').Page) => page.evaluate(() => (window as unknown as { printed: number }).printed);
+// Printing may take up to 10 s by design (map picture drawn until idle, hourly data: src/lib/printing.ts).
+// CI has no GPU, so the map is drawn in software and takes several seconds; wait longer than the app may.
+const PRINT_WAIT = { timeout: 15_000 };
 
 test('the print document is not loaded until Print is used', async ({ page }) => {
   await page.goto('/?lang=en&place=korab');
@@ -18,7 +21,7 @@ test('the print document is not loaded until Print is used', async ({ page }) =>
   await expect(page.locator('.print-doc')).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Print' }).click();
-  await expect.poll(() => printed(page)).toBe(1);
+  await expect.poll(() => printed(page), PRINT_WAIT).toBe(1);
   await expect(page.getByRole('menuitem')).toHaveCount(0);
   await expect(page.locator('.print-doc .page')).toHaveCount(2);
 });
@@ -27,7 +30,7 @@ test('Ctrl+P on a place prints the conditions sheet', async ({ page }) => {
   await page.goto('/?lang=en&place=korab');
   await expect(page.getByRole('button', { name: 'Print' })).toBeVisible();
   await page.keyboard.press('Control+p');
-  await expect.poll(() => printed(page)).toBe(1);
+  await expect.poll(() => printed(page), PRINT_WAIT).toBe(1);
   await expect(page.locator('.print-doc .page')).toHaveCount(2);
 });
 
@@ -36,14 +39,14 @@ test('without the map, the sheet still prints both pages', async ({ page }) => {
   await page.route('https://tiles.openfreemap.org/**', (r) => r.abort());
   await page.goto('/?lang=en&place=korab');
   await page.getByRole('button', { name: 'Print' }).click();
-  await expect.poll(() => printed(page)).toBe(1);
+  await expect.poll(() => printed(page), PRINT_WAIT).toBe(1);
   await expect(page.locator('.print-doc .page')).toHaveCount(2);
 });
 
 async function printSheet(page: import('@playwright/test').Page, lang: 'en' | 'mk') {
   await page.goto(`/?lang=${lang}&place=kozuf`);
   await page.getByRole('button', { name: lang === 'en' ? 'Print' : 'Печати' }).click();
-  await expect.poll(() => printed(page)).toBe(1);
+  await expect.poll(() => printed(page), PRINT_WAIT).toBe(1);
   await page.emulateMedia({ media: 'print' });
   return page.locator('.print-doc .page');
 }
@@ -103,7 +106,7 @@ test('without a map picture the sheet says why, without sending the reader back 
   await page.route('https://tiles.openfreemap.org/**', (r) => r.abort());
   await page.goto('/?lang=en&place=korab');
   await page.getByRole('button', { name: 'Print' }).click();
-  await expect.poll(() => printed(page)).toBe(1);
+  await expect.poll(() => printed(page), PRINT_WAIT).toBe(1);
   await expect(page.locator('.print-doc')).toContainText('Map not available (offline, not loaded yet, or printed from the browser menu).');
 });
 
