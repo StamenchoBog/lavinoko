@@ -70,7 +70,8 @@ CI (`.github/workflows/ci.yml`) runs these on every push and pull request.
 
 ```
 frontend/   SvelteKit static site
-backend/    Python pipeline: terrain/, weather/, contract/ (shape of every data file), ates/ (draft terrain classes), tests/
+backend/    Python pipeline: terrain/, weather/, contract/ (shape of every data file), ates/ (draft terrain classes),
+            verify/ (archived forecasts against what happened), tests/
 config/     regions.json (places), sources.json (licences and credits)
 docs/       architecture decisions (hosting is still open); the forecast archive is in StamenchoBog/lavinoko-archive
 research/   incidents, Swiss comparison, user needs
