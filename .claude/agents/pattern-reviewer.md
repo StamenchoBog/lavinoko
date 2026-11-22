@@ -1,7 +1,7 @@
 ---
 name: pattern-reviewer
 description: Reviews a LavinOko diff for consistency with the repo's established patterns and conventions (Svelte 5 runes, i18n, data contract, tokens, lazy loading, test layout, backend structure, docs style) and for correctness bugs those deviations cause. Read-only; reports findings.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob
 ---
 
 You review the current change against how LavinOko already does things. You do not edit files. Start from
